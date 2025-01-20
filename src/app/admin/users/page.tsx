@@ -26,36 +26,6 @@ const Page = () => {
       createdAt: "2025-01-03",
       updatedAt: "2025-01-15",
     },
-    {
-      id: "4",
-      email: "admin@example.com",
-      createdAt: "2025-01-01",
-      updatedAt: "2025-01-10",
-    },
-    {
-      id: "5",
-      email: "moderator@example.com",
-      createdAt: "2025-01-02",
-      updatedAt: "2025-01-12",
-    },
-    {
-      id: "6",
-      email: "user@example.com",
-      createdAt: "2025-01-03",
-      updatedAt: "2025-01-15",
-    },
-    {
-      id: "7",
-      email: "admin@example.com",
-      createdAt: "2025-01-01",
-      updatedAt: "2025-01-10",
-    },
-    {
-      id: "8",
-      email: "moderator@example.com",
-      createdAt: "2025-01-02",
-      updatedAt: "2025-01-12",
-    },
   ];
 
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
@@ -94,7 +64,7 @@ const Page = () => {
       </div>
       <div className="overflow-auto bg-white rounded-lg shadow-md table-auto max-h-[80vh]">
         <table className="min-w-full">
-          <thead className="bg-gray-800 text-white">
+          <thead className="bg-gray-100 text-gray-600">
             <tr>
               <th className="px-6 py-4 text-left">Email</th>
               <th className="px-6 py-4 text-left">Created At</th>

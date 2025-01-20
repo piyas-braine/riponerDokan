@@ -1,27 +1,31 @@
 "use client";
-import { Order } from "@/types/Types";
 import React, { useState, useEffect, useRef } from "react";
+
+interface Order {
+  id: string;
+  product: string;
+  customer: string;
+  total: number;
+  status: string;
+  date: string;
+}
 
 const orders: Order[] = [
   {
     id: "1",
-    customerEmail: "john.doe@example.com",
-    customerPhone: "123-456-7890",
-    address: "123 Main St, Springfield",
-    status: "PENDING",
-    totalAmount: 299.99,
-    createdAt: "2025-01-01",
-    updatedAt: "2025-01-01",
+    product: "Wireless Headphones",
+    customer: "John Doe",
+    total: 299.99,
+    status: "Completed",
+    date: "2025-01-01",
   },
   {
     id: "2",
-    customerEmail: "jane.smith@example.com",
-    customerPhone: "987-654-3210",
-    address: "456 Elm St, Shelbyville",
-    status: "PROCESSING",
-    totalAmount: 799.99,
-    createdAt: "2025-01-05",
-    updatedAt: "2025-01-05",
+    product: "Smartphone",
+    customer: "Jane Smith",
+    total: 799.99,
+    status: "Processing",
+    date: "2025-01-05",
   },
   // Add more orders as needed
 ];
@@ -32,9 +36,6 @@ const Page: React.FC = () => {
 
   const handleAction = (action: string, orderId: string) => {
     console.log(`Action: ${action}, Order ID: ${orderId}`);
-    // You can update the order status here based on the action
-    // e.g., "Approve" would change the status to "PROCESSING"
-    // and "Reject" would change it to "CANCELLED"
   };
 
   // Close dropdown if click happens outside of it
@@ -56,29 +57,33 @@ const Page: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Orders</h2>
+      <div className="flex justify-between items-center py-4">
+        <h2 className="text-2xl font-semibold">Orders</h2>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+          Add Product
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg max-h-[80vh] overflow-auto">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Oreder ID
+                #
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Customer Email
+                Product
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Customer Phone
+                Customer
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Address
-              </th>
-
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Total Amount
+                Total
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Created At
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Date
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Actions
@@ -92,20 +97,19 @@ const Page: React.FC = () => {
                   {index + 1}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {order.customerEmail}
+                  {order.product}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {order.customerPhone}
+                  {order.customer}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {order.address}
-                </td>
-
-                <td className="px-6 py-4 text-sm text-gray-700">
-                  ${order.totalAmount.toFixed(2)}
+                  ${order.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {order.createdAt}
+                  {order.status}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {order.date}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
                   <div className="relative">
@@ -125,16 +129,22 @@ const Page: React.FC = () => {
                         className="absolute right-1/2 mt-1 bg-white shadow-lg rounded-lg w-40 border border-gray-200 z-10"
                       >
                         <button
-                          onClick={() => handleAction("approve", order.id)}
-                          className="w-full text-left px-4 py-2 text-green-600 hover:bg-green-100 rounded-t-lg transition duration-200"
+                          onClick={() => handleAction("view", order.id)}
+                          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg transition duration-200"
                         >
-                          Approve
+                          View
                         </button>
                         <button
-                          onClick={() => handleAction("reject", order.id)}
+                          onClick={() => handleAction("edit", order.id)}
+                          className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-100 transition duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleAction("delete", order.id)}
                           className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-b-lg transition duration-200"
                         >
-                          Reject
+                          Delete
                         </button>
                       </div>
                     )}
