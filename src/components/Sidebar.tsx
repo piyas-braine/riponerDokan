@@ -1,14 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { IoMenu } from "react-icons/io5"; // Hamburger Menu Icon
 import { RxCross2 } from "react-icons/rx"; // Close Icon
 import { usePathname } from "next/navigation";
 import { routes } from "@/constants/Routes"; // Updated routes with icons
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // Track sidebar state for mobile and large screens
+const Sidebar = ({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (data: boolean) => void;
+}) => {
   const path = usePathname(); // For pathname tracking
 
   useEffect(() => {
@@ -32,7 +37,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="fixed">
       {/* Hamburger Menu Icon */}
       <button
         className="fixed top-4 ml-4 z-50 bg-white p-2 hover:scale-105 hover:shadow-md transition-all duration-700"
@@ -69,7 +74,7 @@ const Sidebar = () => {
                   <span
                     className={`flex items-center rounded-lg p-2 text-base font-normal 
                     ${
-                      path === route.path
+                      path.includes(route.path)
                         ? "bg-gray-200 text-black"
                         : "text-gray-700 hover:bg-gray-100"
                     }

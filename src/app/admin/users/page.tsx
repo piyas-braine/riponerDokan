@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { IoEllipsisHorizontal } from "react-icons/io5"; // For the dropdown menu icon
+import { MdDelete, MdDisabledByDefault, MdUpdate } from "react-icons/md";
 import { RxOpenInNewWindow } from "react-icons/rx";
 
 const Page = () => {
@@ -83,11 +84,13 @@ const Page = () => {
   };
 
   return (
-    <div className="w-full mx-auto my-8 px-4 md:px-8">
+    <div className="w-full mx-auto px-4 md:px-8">
       <div className="flex justify-end mb-4">
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-          Create Moderator
-        </button>
+        <Link href="users/create">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+            Create Moderator
+          </button>
+        </Link>
       </div>
       <div className="overflow-auto bg-white rounded-lg shadow-md table-auto max-h-[80vh]">
         <table className="min-w-full">
@@ -133,21 +136,22 @@ const Page = () => {
                     >
                       <button
                         onClick={() => handleAction("disable", user.id)}
-                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg transition duration-200"
+                        className="w-full flex items-center text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg transition duration-200"
                       >
+                        <MdDisabledByDefault className="mr-2 text-gray-500" />{" "}
                         Disable
                       </button>
                       <button
                         onClick={() => handleAction("delete", user.id)}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 transition duration-200"
+                        className="w-full flex items-center text-left px-4 py-2 text-red-600 hover:bg-red-100 transition duration-200"
                       >
-                        Delete
+                        <MdDelete className="mr-2 text-red-500" /> Delete
                       </button>
                       <button
                         onClick={() => handleAction("update", user.id)}
-                        className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-100 rounded-b-lg transition duration-200"
+                        className="w-full flex items-center text-left px-4 py-2 text-blue-600 hover:bg-blue-100 rounded-b-lg transition duration-200"
                       >
-                        Update
+                        <MdUpdate className="mr-2 text-blue-500" /> Update
                       </button>
                     </div>
                   )}
