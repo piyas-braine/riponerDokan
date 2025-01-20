@@ -15,7 +15,7 @@ export default function Home() {
       <div className="p-6 mx-auto container mt-10">
         <OurProducts></OurProducts>
       </div>
-      <div className="  mt-10">
+      <div className=" mt-16">
         <Footer></Footer>
       </div>
     </div>

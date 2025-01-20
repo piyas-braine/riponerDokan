@@ -10,6 +10,7 @@ export default {
     extend: {
       colors: {
         bannerBg: "#F4F6F5",
+        primaryColor: "#EBD96B",
       },
     },
   },

@@ -9,9 +9,10 @@ import firstSlide from "../../../public/images/Rectangle 20.svg";
 import secondSlide from "../../../public/images/Rectangle 21.svg";
 import thirdSlide from "../../../public/images/Rectangle 22.svg";
 import { HiArrowRight } from "react-icons/hi2";
+import Link from "next/link";
 
 // Dummy product data
-const products = [
+export const products = [
   {
     id: 1,
     name: "Hoodies $ Sweetshirt",
@@ -73,9 +74,11 @@ const OurProductsSlider = () => {
                   <p className="text-lg text-[#7F7F7F]">{product.price}</p>
                 </div>
                 <div>
-                  <button>
-                    <HiArrowRight size={20} />
-                  </button>
+                  <Link href={`/ourProductDetails/${product.id}`}>
+                    <button>
+                      <HiArrowRight size={20} />
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
