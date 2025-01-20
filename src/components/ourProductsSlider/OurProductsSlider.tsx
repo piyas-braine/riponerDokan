@@ -70,7 +70,7 @@ const OurProductsSlider = () => {
               <div className="flex  justify-between items-center mt-4">
                 <div>
                   <h3 className="text-xl font-semibold ">{product.name}</h3>
-                  <p className="text-lg text-gray-500">{product.price}</p>
+                  <p className="text-lg text-[#7F7F7F]">{product.price}</p>
                 </div>
                 <div>
                   <button>

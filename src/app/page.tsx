@@ -1,4 +1,5 @@
 import Banner from "@/components/banner/Banner";
+import Footer from "@/components/footer/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import OurProducts from "@/components/ourProducts/OurProducts";
 
@@ -13,6 +14,9 @@ export default function Home() {
       </div>
       <div className="p-6 mx-auto container mt-10">
         <OurProducts></OurProducts>
+      </div>
+      <div className="  mt-10">
+        <Footer></Footer>
       </div>
     </div>
   );
