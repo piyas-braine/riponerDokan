@@ -1,59 +1,108 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import bcrypt from 'bcryptjs'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from "@prisma/client";
+import bcrypt from 'bcryptjs';
+import { authenticateUser, generateToken } from '@/utils/auth';
+
+const prisma = new PrismaClient();
+
 
 export const loginUser = async (
-    req: NextApiRequest,
-    res: NextApiResponse
+    req: NextRequest
 ) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' })
-    }
 
     try {
-        const { email, password } = req.body
+        const { email, password } = await req.json();
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({ where: { email } });
+
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' })
+            return new NextResponse(JSON.stringify({ error: 'Invalid credentials' }), {
+                status: 401
+            });
         }
 
-        const isValid = await bcrypt.compare(password, user.password)
+        const isValid = await bcrypt.compare(password, user.password);
+
         if (!isValid) {
-            return res.status(401).json({ error: 'Invalid credentials' })
+            return new NextResponse(JSON.stringify({ error: 'Invalid credentials' }), {
+                status: 401
+            });
         }
 
-        const token = generateToken(user)
-        res.json({ token, user: { id: user.id, email: user.email, role: user.role } })
+        const token = generateToken(user);
+
+        return new NextResponse(JSON.stringify({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, role: user.role }, token }), {
+            status: 200
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' })
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
     }
-}
+};
 
 export const registerUser = async (
-    req: NextApiRequest,
-    res: NextApiResponse
+    req: NextRequest
 ) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' })
-    }
-
-    const user = await authenticateUser(req, res, 'SUPER_ADMIN')
-    if (!user) return
-
     try {
-        const { email, password } = req.body
+        const authHeader = req.headers.get('authorization');
+        const token = authHeader?.split(' ')[1];
 
-        const hashedPassword = await bcrypt.hash(password, 10)
-        const newAdmin = await prisma.user.create({
+        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'SUPER_ADMIN' });
+
+        if (!isAuthenticated) {
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401
+            });
+        }
+
+        const { name, email, password } = await req.json();
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.user.create({
             data: {
+                name,
                 email,
                 password: hashedPassword,
                 role: 'ADMIN'
             }
-        })
+        });
 
-        res.json({ id: newAdmin.id, email: newAdmin.email, role: newAdmin.role })
+        return new NextResponse(JSON.stringify({ message: 'User created successfully' }), {
+            status: 201
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' })
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
     }
-}
+};
+
+export const registerSuperAdmin = async (req: NextRequest) => {
+    const { name, email, password } = await req.json();
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    try {
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: 'SUPER_ADMIN'
+            }
+        });
+
+        return new NextResponse(JSON.stringify({ message: 'Super Admin created successfully' }), {
+            status: 201
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
