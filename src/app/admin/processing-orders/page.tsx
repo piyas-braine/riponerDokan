@@ -23,6 +23,16 @@ const orders: Order[] = [
     createdAt: "2025-01-05",
     updatedAt: "2025-01-05",
   },
+  {
+    id: "3",
+    customerEmail: "mike.jones@example.com",
+    customerPhone: "555-555-5555",
+    address: "789 Pine St, Capitol City",
+    status: "PROCESSING",
+    totalAmount: 499.99,
+    createdAt: "2025-01-10",
+    updatedAt: "2025-01-10",
+  },
   // Add more orders as needed
 ];
 
@@ -54,15 +64,20 @@ const Page: React.FC = () => {
     };
   }, []);
 
+  // Filter orders to only show those with the status "PROCESSING"
+  const processingOrders = orders.filter(
+    (order) => order.status === "PROCESSING"
+  );
+
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Orders</h2>
+      <h2 className="text-2xl font-semibold mb-4">Processing Orders</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg max-h-[80vh] overflow-auto">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Oreder ID
+                Order ID
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Customer Email
@@ -73,7 +88,6 @@ const Page: React.FC = () => {
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Address
               </th>
-
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Total Amount
               </th>
@@ -86,7 +100,7 @@ const Page: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, index) => (
+            {processingOrders.map((order, index) => (
               <tr key={order.id} className="border-t hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm font-medium text-gray-800">
                   {index + 1}
@@ -100,7 +114,6 @@ const Page: React.FC = () => {
                 <td className="px-6 py-4 text-sm text-gray-700">
                   {order.address}
                 </td>
-
                 <td className="px-6 py-4 text-sm text-gray-700">
                   ${order.totalAmount.toFixed(2)}
                 </td>

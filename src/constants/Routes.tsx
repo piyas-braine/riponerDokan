@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { AiOutlineProduct } from "react-icons/ai";
 import { FaTachometerAlt } from "react-icons/fa"; // Dashboard Icon
 import { FaClipboardList } from "react-icons/fa"; // Orders Icon
 import { FaCheckCircle } from "react-icons/fa"; // Approved Orders Icon
@@ -19,7 +20,9 @@ interface Route {
 
 export const routes: Route[] = [
   { name: "Dashboard", path: "/admin", icon: <FaTachometerAlt /> },
-  { name: "All Orders", path: "/admin/orders", icon: <FaClipboardList /> },
+  { name: "Products", path: "/admin/products", icon: <AiOutlineProduct /> },
+
+  { name: "New Orders", path: "/admin/orders", icon: <FaClipboardList /> },
   {
     name: "Approved Orders",
     path: "/admin/approved-orders",
@@ -31,8 +34,8 @@ export const routes: Route[] = [
     icon: <FaTimesCircle />,
   },
   {
-    name: "Pending Orders",
-    path: "/admin/pending-orders",
+    name: "Processing Orders",
+    path: "/admin/processing-orders",
     icon: <FaHourglassHalf />,
   },
   { name: "Sales Overview", path: "/admin/sales", icon: <FaChartLine /> },

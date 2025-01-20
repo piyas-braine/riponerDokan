@@ -26,7 +26,7 @@ const orders: Order[] = [
   // Add more orders as needed
 ];
 
-const Page: React.FC = () => {
+const AllOrders: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -149,4 +149,4 @@ const Page: React.FC = () => {
   );
 };
 
-export default Page;
+export default AllOrders;
