@@ -5,6 +5,7 @@ import { authenticateUser, generateToken } from '@/utils/auth';
 
 const prisma = new PrismaClient();
 
+
 export const loginUser = async (
     req: NextRequest
 ) => {
