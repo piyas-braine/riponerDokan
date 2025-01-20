@@ -1,7 +1,9 @@
-import { deleteProduct, updateProduct } from "@/controllers/productController";
+import { deleteProduct, getProduct, updateProduct } from "@/controllers/productController";
 import multerMiddleware from "@/utils/multerMiddleware";
 import { withMiddlewares } from "@/utils/withMiddleware";
 import { NextRequest, NextResponse } from "next/server";
+
+export const GET = getProduct;
 
 export const PATCH = withMiddlewares([multerMiddleware], async (req: NextRequest,) => {
     console.log(req.nextUrl.pathname);

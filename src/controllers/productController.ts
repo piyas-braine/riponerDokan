@@ -30,6 +30,33 @@ export const getAllProducts = async () => {
     }
 };
 
+export const getProduct = async (req: NextRequest, { params }: { params: { id: string } }) => {
+    const { id } = await params;
+
+    try {
+        const product = await prisma.product.findUnique({
+            where: {
+                id: id
+            }
+        });
+
+        if (!product) {
+            return new NextResponse(JSON.stringify({ error: 'Product not found' }), {
+                status: 404
+            });
+        }
+
+        return new NextResponse(JSON.stringify(product), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addProduct = async (req: NextRequest & { files?: any, formData?: any }) => {
     const productInfo = await req.formData;

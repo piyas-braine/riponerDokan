@@ -5,6 +5,75 @@ import { authenticateUser, generateToken } from '@/utils/auth';
 
 const prisma = new PrismaClient();
 
+export const getAllUsers = async (req: NextRequest) => {
+    try {
+        const authHeader = req.headers.get('authorization');        
+        const token = authHeader?.split(' ')[1];
+        
+        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'SUPER_ADMIN' });
+        
+        if (!isAuthenticated) {
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401
+            });
+        }
+
+        const users = await prisma.user.findMany({
+            where: {
+                role: 'ADMIN'
+            }
+        });
+
+        return new NextResponse(JSON.stringify(users), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
+
+
+export const getUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+    const { email } = await params;
+
+    try {
+        const authHeader = req.headers.get('authorization');
+        const token = authHeader?.split(' ')[1];
+
+        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'ADMIN' });
+
+        if (!isAuthenticated) {
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401
+            });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return new NextResponse(JSON.stringify({ error: 'User not found' }), {
+                status: 404
+            });
+        }
+
+        return new NextResponse(JSON.stringify(user), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
+
 
 export const loginUser = async (
     req: NextRequest
