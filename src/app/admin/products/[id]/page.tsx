@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import apiClient from "@/utils/apiClient";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
 const ProductPage = () => {
   const [product, setProduct] = useState<null | Record<string, string>>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
+
   const params = useParams<{ id: string }>();
 
   const { id } = params;
@@ -64,12 +65,11 @@ const ProductPage = () => {
             </div>
 
             {/* Edit Button */}
-            <button
-              onClick={() => router.push(`/edit-product/${product.id}`)}
-              className="mt-6 px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition duration-300"
-            >
-              Edit Product
-            </button>
+            <Link href={`edit/${product.id}`}>
+              <button className="mt-6 px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition duration-300">
+                Edit Product
+              </button>
+            </Link>
           </div>
         </div>
       )}
