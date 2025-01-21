@@ -1,6 +1,7 @@
 import { authenticateUser } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { sendOrderConfirmationEmail } from "@/utils/emailService";
 
 const prisma = new PrismaClient();
 
@@ -17,6 +18,8 @@ type TOrderInfo = {
     customerPhone: string;
     address: string;
     totalAmount: number;
+    deliveryCharge: number;
+    subTotal: number;
     items: TOrderItem[];
 };
 
@@ -95,21 +98,17 @@ export const getOrder = async (req: NextRequest, { params }: { params: { id: str
 export const createOrder = async (req: NextRequest) => {
     const orderInfo: TOrderInfo = await req.json();
 
+    console.log(orderInfo);
+
+    // return new NextResponse(JSON.stringify({ message: 'Order created successfully' }), {
+    //     status: 201
+    // });
+
     try {
-        const authHeader = req.headers.get('authorization');
-        const token = authHeader?.split(' ')[1];
-
-        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'ADMIN' });
-
-        if (!isAuthenticated) {
-            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-                status: 401
-            });
-        }
-
         const order = await prisma.order.create({
             data: {
                 ...orderInfo,
+                subTotal: Number(orderInfo.totalAmount + orderInfo.deliveryCharge),
                 items: {
                     create: orderInfo.items.map((item: TOrderItem) => ({
                         productId: item.productId,
@@ -117,12 +116,36 @@ export const createOrder = async (req: NextRequest) => {
                         price: item.price,
                         quantity: item.quantity,
                     })),
-                },
+                }
             },
             include: {
                 items: true // Include the items relation
             },
         });
+
+        // Send email if customer email is provided
+        if (orderInfo.customerEmail) {
+            try {
+                await sendOrderConfirmationEmail({
+                    customerEmail: orderInfo.customerEmail,
+                    orderNumber: order.id,
+                    items: order.items.map(item => ({
+                        productName: item.productName,
+                        quantity: item.quantity,
+                        price: Number(item.price) // Convert Decimal to number
+                    })),
+                    totalAmount: Number(order.totalAmount),
+                    deliveryCharge: Number(order.deliveryCharge),
+                    subTotal: Number(order.subTotal),
+                    trackingLink: `http://localhost:3000/orders/${order.id}/customer-tracking`
+                });
+            } catch (emailError) {
+                console.error('Failed to send order confirmation email:', emailError);
+                return new NextResponse(JSON.stringify({ error: 'Failed to send order confirmation email' }), {
+                    status: 500
+                });
+            }
+        }
 
         return new NextResponse(JSON.stringify({ message: 'Order created successfully', order: order }), {
             status: 201
@@ -229,6 +252,47 @@ export const deleteOrder = async (req: NextRequest, { params }: { params: { id: 
         });
 
         return new NextResponse(JSON.stringify({ message: 'Order deleted successfully' }), {
+            status: 200
+        });
+    }
+    catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
+
+
+// customer tracking
+export const customerTracking = async (req: NextRequest, { params }: { params: { id: string } }) => {
+    const { id } = await params;
+
+    try {
+        const order = await prisma.order.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                items: true
+            }
+        });
+
+        if (!order) {
+            return new NextResponse(JSON.stringify({ error: 'Order not found' }), {
+                status: 404
+            });
+        }
+
+        return new NextResponse(JSON.stringify({ order: {
+            id: order.id,
+            items: order.items,
+            totalAmount: Number(order.totalAmount),
+            deliveryCharge: Number(order.deliveryCharge),
+            subTotal: Number(order.subTotal),
+            status: order.status,
+            trackingId: order.trackingId
+        } }), {
             status: 200
         });
     }
