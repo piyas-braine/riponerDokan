@@ -175,3 +175,98 @@ export const registerSuperAdmin = async (req: NextRequest) => {
         });
     }
 };
+
+// update user 
+
+export const updateUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+    const { email } = await params;
+
+    try {
+        const authHeader = req.headers.get('authorization');
+        const token = authHeader?.split(' ')[1];
+
+        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'SUPER_ADMIN' });
+
+        if (!isAuthenticated) {
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401
+            });
+        }
+
+        const userInfo = await req.json();
+
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return new NextResponse(JSON.stringify({ error: 'User not found' }), {
+                status: 404
+            });
+        }
+
+        await prisma.user.update({
+            where: {
+                email: email
+            },
+            data: {
+                ...userInfo
+            }
+        });
+
+        return new NextResponse(JSON.stringify({ message: 'User updated successfully' }), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};
+
+export const deleteUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+    const { email } = await params;
+
+    try {
+        const authHeader = req.headers.get('authorization');
+        const token = authHeader?.split(' ')[1];
+
+        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'SUPER_ADMIN' });
+
+        if (!isAuthenticated) {
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401
+            });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return new NextResponse(JSON.stringify({ error: 'User not found' }), {
+                status: 404
+            });
+        }
+
+        await prisma.user.delete({
+            where: {
+                email: email
+            }
+        });
+
+        return new NextResponse(JSON.stringify({ message: 'User deleted successfully' }), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+            status: 500
+        });
+    }
+};

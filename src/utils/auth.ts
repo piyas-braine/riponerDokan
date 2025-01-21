@@ -44,6 +44,10 @@ export const authenticateUser = async ({ token, requiredRole }: { token: string,
             return false;
         }
 
+        if(user.isActive === false) {
+            return false;
+        }
+
         return true;
     } catch (error) {
         console.log(error);
