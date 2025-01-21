@@ -36,7 +36,15 @@ export const authenticateUser = async ({ token, requiredRole }: { token: string,
             return false;
         }
 
+        if(user.role === 'SUPER_ADMIN') {
+            return true;
+        }
+
         if (requiredRole && user.role !== requiredRole) {
+            return false;
+        }
+
+        if(user.isActive === false) {
             return false;
         }
 
