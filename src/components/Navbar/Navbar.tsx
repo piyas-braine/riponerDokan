@@ -3,6 +3,8 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import logo from "../../../public/images/Logo.svg";
+import { BsCart } from "react-icons/bs";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,7 +23,11 @@ const Navbar = () => {
           <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
           <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
           <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
-          <li className="hover:text-gray-700 cursor-pointer">Lifestyle</li>
+          <Link href={"myCart"}>
+            <li className="hover:text-gray-700 cursor-pointer">
+              <BsCart size={24} />
+            </li>
+          </Link>
         </ul>
         <button className="bg-black text-white font-semibold px-5 py-2 rounded-md">
           Sign Up
@@ -58,7 +64,9 @@ const Navbar = () => {
             <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
             <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
             <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
-            <li className="hover:text-gray-700 cursor-pointer">Lifestyle</li>
+            <li className="hover:text-gray-700 cursor-pointer">
+              <BsCart size={24} />
+            </li>{" "}
             <button className="bg-black text-white font-semibold px-5 py-2 rounded-md">
               Sign Up
             </button>
