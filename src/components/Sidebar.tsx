@@ -18,7 +18,14 @@ const Sidebar = ({
   const path = usePathname(); // For pathname tracking
   const router = useRouter();
 
-  const { logout } = useAuth();
+  const { role, logout } = useAuth();
+
+  console.log(role);
+
+  // Filter routes based on the role
+  const filteredRoutes = routes.filter(
+    (route) => !(route.name === "User Management" && role !== "SUPER_ADMIN")
+  );
 
   const handleLogout = () => {
     logout();
@@ -78,7 +85,7 @@ const Sidebar = ({
           }}
         >
           <ul className="space-y-2">
-            {routes.map((route) => (
+            {filteredRoutes.map((route) => (
               <li key={route.path}>
                 <Link href={route.path} passHref>
                   <span

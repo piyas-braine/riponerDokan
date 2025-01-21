@@ -1,17 +1,21 @@
 "use client";
+
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { useAuth } from "@/Providers/AuthContext";
+import apiClient from "@/utils/apiClient";
 
 type TAddProductForm = {
   name: string;
   price: number;
   stock: number;
-  userId: string;
   description: string;
+  image: FileList; // To handle file uploads
 };
 
 const AddProductPage = () => {
+  const { user } = useAuth(); // Assume this hook provides the logged-in user's ID
   const {
     register,
     handleSubmit,
@@ -20,19 +24,24 @@ const AddProductPage = () => {
   const router = useRouter();
 
   const onSubmit: SubmitHandler<TAddProductForm> = async (data) => {
-    try {
-      const response = await fetch("/api/add-product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+    const formData = new FormData();
 
-      if (response.ok) {
+    formData.append("name", data.name);
+    formData.append("price", data.price.toString());
+    formData.append("stock", data.stock.toString());
+    formData.append("userId", user?.id as string); // Automatically attach the user ID
+    formData.append("description", data.description);
+
+    if (data.image?.[0]) {
+      formData.append("files", data.image[0]); // Add the first selected file
+    }
+
+    try {
+      const response = await apiClient.post("/products", formData);
+
+      if (response.data) {
         toast.success("Product added successfully!");
-        router.push("/products"); // Redirect to products page
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to add product.");
+        router.push("/admin/products");
       }
     } catch (error) {
       console.error("Error adding product:", error);
@@ -41,95 +50,121 @@ const AddProductPage = () => {
   };
 
   return (
-    <main className="flex items-center justify-center px-4">
-      <div className="card shadow-xl p-6 max-w-lg bg-base-100 w-full my-8">
-        <h1 className="text-2xl font-bold text-center">Add Product</h1>
+    <main className="flex items-center justify-center h-full bg-gray-100">
+      <div className="card shadow-lg p-4 max-w-4xl bg-white w-full rounded-lg">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Add Product
+        </h1>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-4 mt-4"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           {/* Product Name */}
-          <div className="form-control">
-            <label className="label font-medium">Product Name</label>
+          <div className="form-control col-span-1">
+            <label className="label font-medium text-gray-700 text-base">
+              Product Name
+            </label>
             <input
               type="text"
               placeholder="Enter product name"
               {...register("name", { required: "Product name is required" })}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
             {errors.name && (
-              <p className="text-red-500 text-sm">{errors.name.message}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
             )}
           </div>
 
           {/* Product Price */}
-          <div className="form-control">
-            <label className="label font-medium">Price</label>
+          <div className="form-control col-span-1">
+            <label className="label font-medium text-gray-700 text-base">
+              Price
+            </label>
             <input
               type="number"
               placeholder="Enter price"
               {...register("price", {
                 required: "Price is required",
                 valueAsNumber: true,
+                validate: (value) =>
+                  value > 0 || "Price must be greater than 0",
               })}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
             {errors.price && (
-              <p className="text-red-500 text-sm">{errors.price.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.price.message}
+              </p>
             )}
           </div>
 
           {/* Product Stock */}
-          <div className="form-control">
-            <label className="label font-medium">Stock</label>
+          <div className="form-control col-span-1">
+            <label className="label font-medium text-gray-700 text-base">
+              Stock
+            </label>
             <input
               type="number"
               placeholder="Enter stock quantity"
               {...register("stock", {
                 required: "Stock is required",
                 valueAsNumber: true,
+                validate: (value) => value > 0 || "Stock must be at least 1",
               })}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
             {errors.stock && (
-              <p className="text-red-500 text-sm">{errors.stock.message}</p>
-            )}
-          </div>
-
-          {/* User ID */}
-          <div className="form-control">
-            <label className="label font-medium">User ID</label>
-            <input
-              type="text"
-              placeholder="Enter your User ID"
-              {...register("userId", { required: "User ID is required" })}
-              className="input input-bordered w-full"
-            />
-            {errors.userId && (
-              <p className="text-red-500 text-sm">{errors.userId.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.stock.message}
+              </p>
             )}
           </div>
 
           {/* Product Description */}
-          <div className="form-control">
-            <label className="label font-medium">Description</label>
+          <div className="form-control col-span-1 lg:col-span-2">
+            <label className="label font-medium text-gray-700 text-base">
+              Description
+            </label>
             <textarea
               placeholder="Enter product description"
               {...register("description", {
                 required: "Description is required",
               })}
-              className="textarea textarea-bordered w-full"
+              className="textarea textarea-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
             {errors.description && (
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-sm mt-1">
                 {errors.description.message}
               </p>
             )}
           </div>
 
+          {/* Image Upload */}
+          <div className="form-control col-span-1 lg:col-span-2">
+            <label className="label font-medium text-gray-700 text-base">
+              Product Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              {...register("image", { required: "Product image is required" })}
+              className="file-input file-input-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
+            />
+            {errors.image && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.image.message}
+              </p>
+            )}
+          </div>
+
           {/* Submit Button */}
-          <div className="form-control">
-            <button className="btn btn-primary w-full">Add Product</button>
+          <div className="form-control col-span-1 lg:col-span-2">
+            <button
+              type="submit"
+              className="btn bg-blue-600 text-white w-full py-3 text-lg font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Add Product
+            </button>
           </div>
         </form>
       </div>
