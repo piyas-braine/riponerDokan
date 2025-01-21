@@ -8,15 +8,37 @@ const MyCart = () => {
       id: 1,
       name: "Hoodies & Sweetshirt",
       price: 49.99,
+      quantity: 1,
       image: "/images/Rectangle 20.svg",
     },
     {
       id: 2,
       name: "Coats & Parkas",
       price: 79.99,
+      quantity: 1,
       image: "/images/Rectangle 21.svg",
     },
   ]);
+
+  // Function to increase quantity
+  const handleIncreaseQuantity = (id: number) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  // Function to decrease quantity
+  const handleDecreaseQuantity = (id: number) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
 
   // Function to remove an item from the cart
   const handleRemoveItem = (id: number) => {
@@ -24,7 +46,10 @@ const MyCart = () => {
   };
 
   // Calculate total price
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const totalPrice = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="min-h-screen py-8 bg-gray-50">
@@ -68,8 +93,23 @@ const MyCart = () => {
                           {item.name}
                         </span>
                       </td>
+                      <td className="p-2 md:p-3 text-sm md:text-base text-gray-600 flex items-center space-x-2">
+                        <button
+                          onClick={() => handleDecreaseQuantity(item.id)}
+                          className="bg-gray-200 text-gray-800 rounded-full px-2 py-1"
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          onClick={() => handleIncreaseQuantity(item.id)}
+                          className="bg-gray-200 text-gray-800 rounded-full px-2 py-1"
+                        >
+                          +
+                        </button>
+                      </td>
                       <td className="p-2 md:p-3 text-sm md:text-base text-gray-600">
-                        ${item.price.toFixed(2)}
+                        ${(item.price * item.quantity).toFixed(2)}
                       </td>
                       <td className="p-2 md:p-3">
                         <button
