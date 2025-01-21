@@ -1,5 +1,9 @@
 "use client";
+import apiClient from "@/utils/apiClient";
+import { useRouter } from "next/navigation";
+
 import { useForm, SubmitHandler } from "react-hook-form";
+import { toast } from "react-toastify";
 
 interface UserFormInput {
   name: string;
@@ -11,12 +15,27 @@ interface UserFormInput {
 const Register = () => {
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<UserFormInput>();
 
-  const onSubmit: SubmitHandler<UserFormInput> = (data: UserFormInput) => {
-    console.log("Form Data:", data);
+  const router = useRouter();
+
+  const onSubmit: SubmitHandler<UserFormInput> = async (
+    data: UserFormInput
+  ) => {
+    try {
+      const response = await apiClient.post("/register", data);
+      if (response.data) {
+        reset();
+        toast.success(response.data.message || "user created succesfull");
+        router.push("/admin/users");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error((error as Error).message || "user created succesfull");
+    }
   };
 
   return (

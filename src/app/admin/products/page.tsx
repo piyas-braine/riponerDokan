@@ -1,191 +1,228 @@
 "use client";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import apiClient from "@/utils/apiClient";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 
-type TAddProductForm = {
+interface Product {
+  id: string;
   name: string;
-  price: number;
-  stock: number;
-  userId: string;
   description: string;
-  image: FileList; // To handle file uploads
-};
+  price: string;
+  stock: number;
+  productImages: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-const AddProductPage = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TAddProductForm>();
-  const router = useRouter();
+const Page: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const onSubmit: SubmitHandler<TAddProductForm> = async (data) => {
-    const formData = new FormData();
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products"); // Replace with your API endpoint
+        const data: Product[] = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-    formData.append("name", data.name);
-    formData.append("price", data.price.toString());
-    formData.append("stock", data.stock.toString());
-    formData.append("userId", data.userId);
-    formData.append("description", data.description);
-
-    if (data.image?.[0]) {
-      formData.append("image", data.image[0]); // Add the first selected file
-    }
+  // Handle delete action
+  const handleDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      const response = await fetch("/api/add-product", {
-        method: "POST",
-        body: formData, // Send multipart/form-data
-      });
+      const response = await apiClient.delete(`/products/${productToDelete}`);
 
-      if (response.ok) {
-        toast.success("Product added successfully!");
-        router.push("/products");
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to add product.");
+      if (response.data) {
+        setProducts((prevProducts) =>
+          prevProducts.filter((product) => product.id !== productToDelete)
+        );
+
+        toast.success("Deleted Successfully");
+        setOpenDeleteModal(false);
       }
     } catch (error) {
-      console.error("Error adding product:", error);
-      toast.error("An error occurred while adding the product.");
+      toast((error as Error).message || "failed to delete");
+      console.error("Failed to delete product", error);
     }
   };
 
+  // Close dropdown if click happens outside of it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="card shadow-xl p-8 max-w-2xl bg-white w-full rounded-lg">
-        <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">
-          Add Product
-        </h1>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-6"
-        >
-          {/* Product Name */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">
-              Product Name
-            </label>
-            <input
-              type="text"
-              placeholder="Enter product name"
-              {...register("name", { required: "Product name is required" })}
-              className="input input-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* Product Price */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">Price</label>
-            <input
-              type="number"
-              placeholder="Enter price"
-              {...register("price", {
-                required: "Price is required",
-                valueAsNumber: true,
-                validate: (value) =>
-                  value > 0 || "Price must be greater than 0",
-              })}
-              className="input input-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.price && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.price.message}
-              </p>
-            )}
-          </div>
-
-          {/* Product Stock */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">Stock</label>
-            <input
-              type="number"
-              placeholder="Enter stock quantity"
-              {...register("stock", {
-                required: "Stock is required",
-                valueAsNumber: true,
-                validate: (value) =>
-                  value > 0 || "Stock must be greater than 0",
-              })}
-              className="input input-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.stock && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.stock.message}
-              </p>
-            )}
-          </div>
-
-          {/* User ID */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">User ID</label>
-            <input
-              type="text"
-              placeholder="Enter your User ID"
-              {...register("userId", { required: "User ID is required" })}
-              className="input input-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.userId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.userId.message}
-              </p>
-            )}
-          </div>
-
-          {/* Product Description */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              placeholder="Enter product description"
-              {...register("description", {
-                required: "Description is required",
-              })}
-              className="textarea textarea-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          {/* Image Upload */}
-          <div className="form-control">
-            <label className="label font-medium text-gray-700">
-              Product Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              {...register("image", { required: "Product image is required" })}
-              className="file-input file-input-bordered w-full border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.image && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.image.message}
-              </p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <div className="form-control">
-            <button
-              type="submit"
-              className="btn bg-blue-600 text-white w-full py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Add Product
-            </button>
-          </div>
-        </form>
+    <div className="p-4">
+      <div className="flex justify-between items-center py-4">
+        <h2 className="text-2xl font-semibold">Products</h2>
+        <Link href="products/add">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+            Add Product
+          </button>
+        </Link>
       </div>
-    </main>
+      {products.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg max-h-[80vh] overflow-auto">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Images
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Description
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Stock
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} className="border-t hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-700 flex justify-center items-center">
+                    {product.productImages.map((image, index) => (
+                      <Image
+                        key={index}
+                        src={"/" + image}
+                        width={40}
+                        height={40}
+                        alt="Product"
+                        className="w-16 h-16 object-cover inline-block mr-2"
+                      />
+                    ))}
+                  </td>
+                  <td
+                    className="px-6 py-4 text-sm font-medium text-gray-800 truncate"
+                    title={product.id}
+                  >
+                    {product.id}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {product.name}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {product.description}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    ${product.price}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {product.stock}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    <div className="relative">
+                      <button
+                        className="px-3 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                        onClick={() => {
+                          setOpenDropdown(
+                            openDropdown === product.id ? null : product.id
+                          );
+                        }}
+                      >
+                        Actions
+                      </button>
+                      {openDropdown === product.id && (
+                        <div
+                          ref={dropdownRef}
+                          className="absolute right-1/2 mt-1 bg-white shadow-lg rounded-lg w-40 border border-gray-200 z-10"
+                        >
+                          <Link href={`products/${product.id}`}>
+                            <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg transition duration-200">
+                              View
+                            </button>
+                          </Link>
+                          <Link href={`products/edit/${product.id}`}>
+                            <button className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-100 transition duration-200">
+                              Edit
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setProductToDelete(product.id);
+                              setOpenDeleteModal(true);
+                            }}
+                            className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-b-lg transition duration-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-center m-4 text-2xl font-bold">
+          No product found
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {openDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 className="text-lg font-semibold text-gray-700">
+              Are you sure you want to delete this product?
+            </h3>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                onClick={() => setOpenDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default AddProductPage;
+export default Page;

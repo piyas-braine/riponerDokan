@@ -3,57 +3,89 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useAuth } from "@/Providers/AuthContext";
-import apiClient from "@/utils/apiClient";
 
-type TAddProductForm = {
+import apiClient from "@/utils/apiClient";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+
+type TUpdateProductForm = {
   name: string;
   price: number;
   stock: number;
   description: string;
-  image: FileList; // To handle file uploads
+  image?: FileList; // Optional for updating (image may or may not be uploaded)
 };
 
-const AddProductPage = () => {
-  const { user } = useAuth(); // Assume this hook provides the logged-in user's ID
+const Page = () => {
+  // Assume this hook provides the logged-in user's ID
+  const router = useRouter();
+  const { id } = useParams(); // Get the product id from URL parameters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [product, setProduct] = useState<any>(null); // State to store fetched product data
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TAddProductForm>();
-  const router = useRouter();
+    setValue,
+  } = useForm<TUpdateProductForm>();
 
-  const onSubmit: SubmitHandler<TAddProductForm> = async (data) => {
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const response = await apiClient.get(`/products/${id}`);
+        const fetchedProduct = response.data;
+        setProduct(fetchedProduct);
+
+        // Set form values using the fetched data
+        setValue("name", fetchedProduct.name);
+        setValue("price", fetchedProduct.price);
+        setValue("stock", fetchedProduct.stock);
+        setValue("description", fetchedProduct.description);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        toast.error("An error occurred while fetching the product.");
+      }
+    };
+
+    if (id) {
+      fetchProductData();
+    }
+  }, [id, setValue]);
+
+  const onSubmit: SubmitHandler<TUpdateProductForm> = async (data) => {
     const formData = new FormData();
 
     formData.append("name", data.name);
     formData.append("price", data.price.toString());
     formData.append("stock", data.stock.toString());
-    formData.append("userId", user?.id as string); // Automatically attach the user ID
     formData.append("description", data.description);
 
     if (data.image?.[0]) {
-      formData.append("files", data.image[0]); // Add the first selected file
+      formData.append("files", data.image[0]); // Add the new image if provided
     }
 
     try {
-      const response = await apiClient.post("/products", formData);
+      const response = await apiClient.patch(`/products/${id}`, formData);
 
       if (response.data) {
-        toast.success("Product added successfully!");
+        toast.success("Product updated successfully!");
         router.push("/admin/products");
       }
     } catch (error) {
-      console.error("Error adding product:", error);
-      toast.error("An error occurred while adding the product.");
+      console.error("Error updating product:", error);
+      toast.error("An error occurred while updating the product.");
     }
   };
 
+  if (!product) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <main className="flex items-center justify-center h-full bg-gray-100">
-      <div className="card shadow-lg p-4 max-w-4xl bg-white w-full rounded-lg">
+      <div className="card shadow-lg p-4 max-w-4xl bg-white w-full rounded-lg m-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Add Product
+          Update Product
         </h1>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -142,12 +174,12 @@ const AddProductPage = () => {
           {/* Image Upload */}
           <div className="form-control col-span-1 lg:col-span-2">
             <label className="label font-medium text-gray-700 text-base">
-              Product Image
+              Product Image (Optional)
             </label>
             <input
               type="file"
               accept="image/*"
-              {...register("image", { required: "Product image is required" })}
+              {...register("image")}
               className="file-input file-input-bordered w-full px-3 py-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
             {errors.image && (
@@ -163,7 +195,7 @@ const AddProductPage = () => {
               type="submit"
               className="btn bg-blue-600 text-white w-full py-3 text-lg font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Add Product
+              Update Product
             </button>
           </div>
         </form>
@@ -172,4 +204,4 @@ const AddProductPage = () => {
   );
 };
 
-export default AddProductPage;
+export default Page;

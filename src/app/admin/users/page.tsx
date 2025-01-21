@@ -1,38 +1,39 @@
 "use client";
 
+import apiClient from "@/utils/apiClient";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { IoEllipsisHorizontal } from "react-icons/io5"; // For the dropdown menu icon
 import { MdDelete, MdDisabledByDefault, MdUpdate } from "react-icons/md";
 import { RxOpenInNewWindow } from "react-icons/rx";
 
-const Page = () => {
-  const users = [
-    {
-      id: "1",
-      email: "admin@example.com",
-      createdAt: "2025-01-01",
-      updatedAt: "2025-01-10",
-    },
-    {
-      id: "2",
-      email: "moderator@example.com",
-      createdAt: "2025-01-02",
-      updatedAt: "2025-01-12",
-    },
-    {
-      id: "3",
-      email: "user@example.com",
-      createdAt: "2025-01-03",
-      updatedAt: "2025-01-15",
-    },
-  ];
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
+const Page = () => {
+  const [users, setUsers] = useState<User[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userDetails, setUserDetails] = useState<User | null>(null); // Store selected user details
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Close the dropdown if clicked outside
   useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await apiClient.get("/users"); // Adjust the API endpoint as needed
+      if (response.data) {
+        setUsers(response.data);
+      }
+    };
+    fetchUsers();
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -51,6 +52,16 @@ const Page = () => {
   const handleAction = (action: string, userId: string) => {
     console.log(action, userId);
     // Handle your action here (e.g., disable, delete, or update user)
+  };
+
+  const handleDelete = () => {
+    console.log("Deleting user with ID:", userToDelete);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleViewDetails = (user: User) => {
+    setUserDetails(user);
+    setIsModalOpen(true);
   };
 
   return (
@@ -80,15 +91,20 @@ const Page = () => {
                 className="border-b hover:bg-gray-50 transition duration-300"
               >
                 <td className="px-6 py-4">{user.email}</td>
-                <td className="px-6 py-4">{user.createdAt}</td>
-                <td className="px-6 py-4">{user.updatedAt}</td>
+                <td className="px-6 py-4">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4">
+                  {new Date(user.updatedAt).toLocaleDateString()}
+                </td>
 
                 <td className="px-6 py-4 text-center">
-                  <Link href={`users/${user.id}`}>
-                    <button className="text-gray-600 hover:text-black">
-                      <RxOpenInNewWindow size={20} />
-                    </button>
-                  </Link>
+                  <button
+                    onClick={() => handleViewDetails(user)}
+                    className="text-gray-600 hover:text-black"
+                  >
+                    <RxOpenInNewWindow size={20} />
+                  </button>
                 </td>
                 <td className="px-6 py-4 relative text-center">
                   <button
@@ -112,7 +128,10 @@ const Page = () => {
                         Disable
                       </button>
                       <button
-                        onClick={() => handleAction("delete", user.id)}
+                        onClick={() => {
+                          setUserToDelete(user.id);
+                          setIsDeleteModalOpen(true);
+                        }}
                         className="w-full flex items-center text-left px-4 py-2 text-red-600 hover:bg-red-100 transition duration-200"
                       >
                         <MdDelete className="mr-2 text-red-500" /> Delete
@@ -131,6 +150,63 @@ const Page = () => {
           </tbody>
         </table>
       </div>
+
+      {/* User Details Modal */}
+      {isModalOpen && userDetails && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-semibold mb-4">User Details</h3>
+            <p>
+              <strong>Name:</strong> {userDetails.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {userDetails.email}
+            </p>
+            <p>
+              <strong>Role:</strong> {userDetails.role}
+            </p>
+            <p>
+              <strong>Created At:</strong>{" "}
+              {new Date(userDetails.createdAt).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Updated At:</strong>{" "}
+              {new Date(userDetails.updatedAt).toLocaleDateString()}
+            </p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && userToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
+            <p>Are you sure you want to delete this user?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

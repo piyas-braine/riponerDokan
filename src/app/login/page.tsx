@@ -20,7 +20,7 @@ const Page = () => {
 
   const router = useRouter();
 
-  const { setToken, setRole } = useAuth();
+  const { setToken, setRole, setUser } = useAuth();
 
   const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     try {
@@ -36,7 +36,7 @@ const Page = () => {
 
       const result = await response.json();
       const { token, user } = result;
-
+      setUser(user);
       setToken(token);
       setRole(user.role);
       localStorage.setItem("authToken", token);
