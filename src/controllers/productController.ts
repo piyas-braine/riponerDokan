@@ -15,6 +15,7 @@ type TProductImages = {
     size: number;
 };
 
+// get all products
 export const getAllProducts = async () => {
     try {
         const products = await prisma.product.findMany();
@@ -30,6 +31,8 @@ export const getAllProducts = async () => {
     }
 };
 
+
+// get product by id
 export const getProduct = async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = await params;
 
@@ -57,6 +60,8 @@ export const getProduct = async (req: NextRequest, { params }: { params: { id: s
     }
 };
 
+
+// add a product
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addProduct = async (req: NextRequest & { files?: any, formData?: any }) => {
     const productInfo = await req.formData;
@@ -65,7 +70,7 @@ export const addProduct = async (req: NextRequest & { files?: any, formData?: an
         ...productInfo,
         price: parseFloat(productInfo.price),
         stock: parseInt(productInfo.stock),
-    }
+    };
 
     const productImages = req.files as TProductImages[];
 
@@ -111,6 +116,7 @@ export const addProduct = async (req: NextRequest & { files?: any, formData?: an
 };
 
 
+// update a product
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const updateProduct = async (req: NextRequest & { files?: any, formData?: any }, { params }: { params: { id: string } }) => {
     const { id } = await params;
@@ -119,8 +125,8 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
 
     const updateProductInfo = {
         ...productInfo,
-        price: parseFloat(productInfo.price),
-        stock: parseInt(productInfo.stock),
+        ...(productInfo.price !== undefined && { price: parseFloat(productInfo.price) }),
+        ...(productInfo.stock !== undefined && { stock: parseInt(productInfo.stock) }),
     }
 
     const productImages = req.files as TProductImages[];
@@ -128,8 +134,6 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
     if (productImages?.length > 5) {
         return new NextResponse("You can not upload more than 5 images", { status: 405 });
     }
-
-    const productImagesPath = productImages.map((ProductImage: TProductImages) => ProductImage.path.replaceAll('\\', '/'));
 
     try {
         const authHeader = req.headers.get('authorization');
@@ -155,45 +159,47 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
             });
         }
 
-        const updatedImagesPath = [
-            ...(Array.isArray(product?.productImages) ? product.productImages : []),
-            ...productImagesPath,
-        ];
+        if (productImages.length > 0) {
+            const productImagesPath = productImages.map((ProductImage: TProductImages) => ProductImage.path.replaceAll('\\', '/'));
 
-        if (updatedImagesPath.length > 5) {
-            const sliceAmount = updatedImagesPath.length - 5;
-            const slicedImagesPath = updatedImagesPath.slice(sliceAmount);
+            const updatedImagesPath = [
+                ...(Array.isArray(product?.productImages) ? product.productImages : []),
+                ...productImagesPath,
+            ];
+
+            if (updatedImagesPath.length > 5) {
+                const sliceAmount = updatedImagesPath.length - 5;
+                const slicedImagesPath = updatedImagesPath.slice(sliceAmount);
+
+                await prisma.product.update({
+                    where: {
+                        id: id
+                    },
+                    data: {
+                        ...updateProductInfo,
+                        productImages: slicedImagesPath,
+                    }
+                });
+
+                return new NextResponse(JSON.stringify({ message: 'Product updated successfully' }), {
+                    status: 200
+                });
+            }
 
             await prisma.product.update({
                 where: {
                     id: id
                 },
                 data: {
-                    name: updateProductInfo.name || product.name,
-                    description: updateProductInfo.description || product.description,
-                    price: updateProductInfo.price || product.price,
-                    stock: updateProductInfo.stock || product.stock,
-                    productImages: slicedImagesPath,
-                    userId: updateProductInfo.userId || product.userId
+                    ...updateProductInfo,
+                    productImages: updatedImagesPath,
                 }
-            });
-
-            return new NextResponse(JSON.stringify({ message: 'Product updated successfully' }), {
-                status: 200
             });
         }
 
         await prisma.product.update({
-            where: {
-                id: id
-            },
-            data: {
-                name: updateProductInfo.name || product.name,
-                description: updateProductInfo.description || product.description,
-                price: updateProductInfo.price || product.price,
-                stock: updateProductInfo.stock || product.stock,
-                productImages: updatedImagesPath,
-                userId: updateProductInfo.userId || product.userId
+            where: { id: id }, data: {
+                ...updateProductInfo
             }
         });
 
@@ -209,6 +215,8 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
     }
 };
 
+
+// delete a product
 export const deleteProduct = async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = await params;
 
