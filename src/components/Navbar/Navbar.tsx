@@ -16,7 +16,7 @@ const Navbar = () => {
       </div>
 
       {/* Menu for larger devices */}
-      <div className="hidden md:flex space-x-10">
+      <div className="hidden md:flex space-x-5">
         <ul className="flex items-center space-x-8 font-semibold">
           <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
           <li className="hover:text-gray-700 cursor-pointer">Fashion</li>

@@ -50,15 +50,26 @@ const OurProductsSlider = () => {
     <div>
       <Swiper
         spaceBetween={30}
-        slidesPerView={3}
+        slidesPerView={1}
         loop={true}
         navigation
         pagination={{ clickable: true }}
+        breakpoints={{
+          640: {
+            slidesPerView: 1,
+          },
+          768: {
+            slidesPerView: 2,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+        }}
         className="mySwiper"
       >
         {products.map((product) => (
           <SwiperSlide key={product.id}>
-            <div className="">
+            <div className="w-auto">
               {/* Using Next.js Image component */}
               <Image
                 src={product.image}

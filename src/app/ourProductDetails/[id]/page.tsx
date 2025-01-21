@@ -71,7 +71,6 @@ export default async function ProductDetails({
                 ))}
               </div>
             </div>
-
             {/* Add to Cart Button */}
             <button className="w-full px-6 py-3 bg-primaryColor text-white text-lg font-medium rounded-lg shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primaryColor">
               Add to Cart
