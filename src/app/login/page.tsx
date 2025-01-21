@@ -1,5 +1,10 @@
 "use client";
+import Cookies from "js-cookie"; // Import js-cookie
+
+import { useAuth } from "@/Providers/AuthContext";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { toast } from "react-toastify";
 
 interface LoginFormInput {
   email: string;
@@ -13,9 +18,42 @@ const Page = () => {
     formState: { errors },
   } = useForm<LoginFormInput>();
 
-  const onSubmit: SubmitHandler<LoginFormInput> = (data: LoginFormInput) => {
-    console.log("Login Data:", data);
-    // Handle login logic here (e.g., API call)
+  const router = useRouter();
+
+  const { setToken, setRole } = useAuth();
+
+  const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid credentials");
+      }
+
+      const result = await response.json();
+      const { token, user } = result;
+
+      setToken(token);
+      setRole(user.role);
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userRole", user.role);
+
+      Cookies.set("authToken", token, { expires: 7 });
+      Cookies.set("userRole", user.role, { expires: 7 });
+
+      if (user.role === "SUPER_ADMIN" || user.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        alert("Unauthorized");
+      }
+    } catch (error) {
+      toast.error((error as Error).message || "failed to login");
+      alert("Login failed");
+    }
   };
 
   return (

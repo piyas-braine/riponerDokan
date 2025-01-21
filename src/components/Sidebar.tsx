@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { IoMenu } from "react-icons/io5"; // Hamburger Menu Icon
 import { RxCross2 } from "react-icons/rx"; // Close Icon
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { routes } from "@/constants/Routes"; // Updated routes with icons
+import { useAuth } from "@/Providers/AuthContext";
 
 const Sidebar = ({
   isOpen,
@@ -15,6 +16,15 @@ const Sidebar = ({
   setIsOpen: (data: boolean) => void;
 }) => {
   const path = usePathname(); // For pathname tracking
+  const router = useRouter();
+
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    // Redirect
+    router.push("/login");
+  };
 
   useEffect(() => {
     // Ensure sidebar remains open for larger screens
@@ -40,7 +50,7 @@ const Sidebar = ({
     <div className="fixed">
       {/* Hamburger Menu Icon */}
       <button
-        className="fixed top-4 ml-4 z-50 bg-white p-2 hover:scale-105 hover:shadow-md transition-all duration-700"
+        className="fixed top-4 ml-4 z-[200] bg-white p-2 hover:scale-105 hover:shadow-md transition-all duration-700"
         onClick={toggleSidebar}
         aria-label="Toggle Sidebar"
       >
@@ -53,7 +63,7 @@ const Sidebar = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 z-40 h-screen transition-all duration-500 ease-in-out bg-white shadow-lg 
+        className={`fixed left-0 h-screen transition-all duration-500 ease-in-out bg-white shadow-lg 
           ${isOpen ? "translate-x-0" : "-translate-x-full"} 
           md:translate-x-0 md:static md:w-64 
           ${isOpen ? "md:max-w-64" : "md:max-w-16"}
@@ -89,6 +99,14 @@ const Sidebar = ({
               </li>
             ))}
           </ul>
+          <div className="absolute bottom-16 left-0 right-0 px-4">
+            <button
+              className="w-full py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </div>
         </nav>
       </aside>
     </div>

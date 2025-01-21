@@ -1,16 +1,10 @@
 "use client";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-enum Role {
-  ADMIN = "ADMIN",
-  SUPER_ADMIN = "SUPER_ADMIN",
-}
-
 interface UserFormInput {
   name: string;
   email: string;
   password: string;
-  role: Role;
   rememberMe: boolean;
 }
 
@@ -102,26 +96,6 @@ const Register = () => {
                 </p>
               )}
             </div>
-          </div>
-
-          {/* Role Dropdown */}
-          <div className="mb-3">
-            <label className="block text-gray-700 mb-1">Role</label>
-            <select
-              {...register("role", { required: "Role is required" })}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                errors.role
-                  ? "border-red-500 focus:ring-red-400"
-                  : "border-gray-300 focus:ring-blue-400"
-              }`}
-            >
-              <option value="">Select a role</option>
-              <option value={Role.ADMIN}>Admin</option>
-              <option value={Role.SUPER_ADMIN}>Super Admin</option>
-            </select>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
-            )}
           </div>
 
           {/* Remember Me Checkbox */}
