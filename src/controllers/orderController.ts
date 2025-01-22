@@ -74,6 +74,9 @@ export const getOrder = async (req: NextRequest, { params }: { params: { id: str
         const order = await prisma.order.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                items: true
             }
         });
 
@@ -97,12 +100,6 @@ export const getOrder = async (req: NextRequest, { params }: { params: { id: str
 // create an order
 export const createOrder = async (req: NextRequest) => {
     const orderInfo: TOrderInfo = await req.json();
-
-    console.log(orderInfo);
-
-    // return new NextResponse(JSON.stringify({ message: 'Order created successfully' }), {
-    //     status: 201
-    // });
 
     try {
         const order = await prisma.order.create({
@@ -183,14 +180,14 @@ export const updateOrder = async (req: NextRequest, { params }: { params: { id: 
             });
         }
 
-        const order = await prisma.order.update({
+        await prisma.order.update({
             where: { id },
             data: {
                 ...orderUpdates
             }
         });
 
-        return new NextResponse(JSON.stringify({ message: 'Order updated successfully', order: order }), {
+        return new NextResponse(JSON.stringify({ message: 'Order updated successfully' }), {
             status: 200
         });
     }
@@ -284,15 +281,17 @@ export const customerTracking = async (req: NextRequest, { params }: { params: {
             });
         }
 
-        return new NextResponse(JSON.stringify({ order: {
-            id: order.id,
-            items: order.items,
-            totalAmount: Number(order.totalAmount),
-            deliveryCharge: Number(order.deliveryCharge),
-            subTotal: Number(order.subTotal),
-            status: order.status,
-            trackingId: order.trackingId
-        } }), {
+        return new NextResponse(JSON.stringify({
+            order: {
+                id: order.id,
+                items: order.items,
+                totalAmount: Number(order.totalAmount),
+                deliveryCharge: Number(order.deliveryCharge),
+                subTotal: Number(order.subTotal),
+                status: order.status,
+                trackingId: order.trackingId
+            }
+        }), {
             status: 200
         });
     }

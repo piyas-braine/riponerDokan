@@ -195,6 +195,10 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
                     productImages: updatedImagesPath,
                 }
             });
+
+            return new NextResponse(JSON.stringify({ message: 'Product updated successfully' }), {
+                status: 200
+            });
         }
 
         await prisma.product.update({

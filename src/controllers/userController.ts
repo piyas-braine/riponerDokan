@@ -7,11 +7,11 @@ const prisma = new PrismaClient();
 
 export const getAllUsers = async (req: NextRequest) => {
     try {
-        const authHeader = req.headers.get('authorization');        
+        const authHeader = req.headers.get('authorization');
         const token = authHeader?.split(' ')[1];
-        
+
         const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'SUPER_ADMIN' });
-        
+
         if (!isAuthenticated) {
             return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
                 status: 401
@@ -21,6 +21,15 @@ export const getAllUsers = async (req: NextRequest) => {
         const users = await prisma.user.findMany({
             where: {
                 role: 'ADMIN'
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true
             }
         });
 
@@ -54,6 +63,15 @@ export const getUser = async (req: NextRequest, { params }: { params: { email: s
         const user = await prisma.user.findUnique({
             where: {
                 email: email
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true
             }
         });
 
