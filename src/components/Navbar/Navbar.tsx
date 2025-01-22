@@ -1,13 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../../../public/images/Logo.svg";
 import { BsCart } from "react-icons/bs";
 import Link from "next/link";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartLength, setCartLength] = useState<number>(0);
+
+  // Fetch cart length from localStorage
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      const cartItems = JSON.parse(storedCart);
+      setCartLength(cartItems.length); // Set the length of items in cart
+      console.log("Cart Items:", cartItems); // Debug
+    }
+  }, []);
 
   return (
     <nav className="relative z-50 flex justify-between w-full items-center px-4 py-3 bg-white">
@@ -24,8 +35,11 @@ const Navbar = () => {
           <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
           <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
           <Link href={"myCart"}>
-            <li className="hover:text-gray-700 cursor-pointer">
-              <BsCart size={24} />
+            <li className="relative hover:text-gray-700 cursor-pointer">
+              <BsCart size={28} />
+              <span className="absolute top-0 right-0 flex justify-center items-center text-xs text-white bg-black rounded-full w-4 h-4">
+                {cartLength > 0 ? cartLength : 0}
+              </span>
             </li>
           </Link>
         </ul>
@@ -59,14 +73,14 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-white  md:hidden z-50">
+        <div className="absolute top-full left-0 w-full bg-white md:hidden z-50">
           <ul className="flex flex-col items-center space-y-4 py-4 font-semibold">
             <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
             <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
             <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
             <li className="hover:text-gray-700 cursor-pointer">
               <BsCart size={24} />
-            </li>{" "}
+            </li>
             <button className="bg-black text-white font-semibold px-5 py-2 rounded-md">
               Sign Up
             </button>
