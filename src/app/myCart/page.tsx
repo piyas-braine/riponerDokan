@@ -57,21 +57,64 @@ const MyCart = () => {
       },
     });
   };
-  const handleOrderSubmit = (orderData: any) => {
-    console.log("Order Data:", orderData);
-    toast.success("Your order has been placed successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "colored",
-    });
-    setIsModalOpen(false);
-    setCartItems([]);
-    localStorage.removeItem("cart");
-    console.log(orderData);
+  const handleOrderSubmit = async (orderData: any) => {
+    try {
+      console.log("Order Data:", orderData);
+
+      // Send the order data to the backend
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData), // Convert orderData to JSON string
+      });
+
+      if (response.ok) {
+        // Handle success
+        toast.success("Your order has been placed successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+
+        // Reset modal and cart
+        setIsModalOpen(false);
+        setCartItems([]);
+        localStorage.removeItem("cart");
+
+        const result = await response.json();
+        console.log("Order Response:", result);
+      } else {
+        // Handle error response
+        toast.error("Failed to place the order. Please try again!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+        console.error("Order placement failed:", response.statusText);
+      }
+    } catch (error) {
+      // Handle network errors
+      console.error("Error placing order:", error);
+      toast.error("Something went wrong. Please try again!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    }
   };
 
   const totalPrice = cartItems.reduce(
