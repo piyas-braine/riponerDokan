@@ -28,7 +28,7 @@ export default async function ProductDetails({
       );
     }
 
-    const { name, price, image, description } = product;
+    const { name, price, productImages, description } = product;
 
     return (
       <div className="bg-gray-50 min-h-screen">
@@ -40,7 +40,9 @@ export default async function ProductDetails({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="relative w-full h-96 md:h-[500px] rounded-lg overflow-hidden shadow-lg">
               <Image
-                src={image}
+                src={`/${productImages[0].split("/")[1]}/${
+                  productImages[0].split("/")[2]
+                }/${productImages[0].split("/")[3]}`}
                 alt={name}
                 layout="fill"
                 objectFit="cover"
