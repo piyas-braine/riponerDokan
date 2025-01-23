@@ -26,8 +26,8 @@ interface Order {
   items: OrderItem[];
 }
 
-const RejectedOrdersPage: React.FC = () => {
-  const [rejectedOrders, setRejectedOrders] = useState<Order[]>([]);
+const DeliveredOrdersPage: React.FC = () => {
+  const [deliveredOrders, setDeliveredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,11 +36,12 @@ const RejectedOrdersPage: React.FC = () => {
       setLoading(true);
       try {
         const response = await apiClient.get<Order[]>(
-          "orders?status=CANCELLED"
+          "orders?status=DELIVERED"
         );
-        setRejectedOrders(response.data);
+        setDeliveredOrders(response.data);
       } catch (err) {
         setError("Failed to fetch orders. Please try again.");
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -49,16 +50,16 @@ const RejectedOrdersPage: React.FC = () => {
     fetchApprovedOrders();
   }, []);
 
-  console.log(rejectedOrders);
+  console.log(deliveredOrders);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Rejected Orders</h2>
+      <h2 className="text-2xl font-semibold mb-4">Delivered Orders</h2>
       <div className="overflow-x-auto">
-        <table className="table-auto w-full text-sm border-collapse border border-gray-200">
+        <table className="table-auto w-full border-collapse text-sm border border-gray-200">
           <thead>
             <tr>
               <th className="border border-gray-300 p-2">Order ID</th>
@@ -69,13 +70,13 @@ const RejectedOrdersPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {rejectedOrders.map((order) => (
+            {deliveredOrders.map((order) => (
               <tr key={order.id}>
                 <td className="border border-gray-300 p-2">{order.id}</td>
                 <td className="border border-gray-300 p-2">
                   {order.customerEmail}
                 </td>
-                <td className="border border-gray-300 p-2 text-xs font-bold text-red-500">
+                <td className="border border-gray-300 text-xs font-bold text-green-500 p-2">
                   {order.status}
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -93,4 +94,4 @@ const RejectedOrdersPage: React.FC = () => {
   );
 };
 
-export default RejectedOrdersPage;
+export default DeliveredOrdersPage;

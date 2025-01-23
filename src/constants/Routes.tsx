@@ -10,6 +10,7 @@ import { FaChartLine } from "react-icons/fa"; // Sales Overview Icon
 import { FaUserFriends } from "react-icons/fa"; // User Management Icon
 import { FaCog } from "react-icons/fa"; // Settings Icon
 import { IoAnalytics } from "react-icons/io5";
+import { AiOutlineDeliveredProcedure } from "react-icons/ai";
 
 // Define the type for a route
 interface Route {
@@ -34,9 +35,14 @@ export const routes: Route[] = [
     icon: <FaTimesCircle />,
   },
   {
-    name: "Processing Orders",
+    name: "Shipped Orders",
     path: "/admin/processing-orders",
     icon: <FaHourglassHalf />,
+  },
+  {
+    name: "Delivered Orders",
+    path: "/admin/delivered-orders",
+    icon: <AiOutlineDeliveredProcedure />,
   },
   { name: "Sales Overview", path: "/admin/sales", icon: <FaChartLine /> },
   { name: "Analytics", path: "/admin/analytics", icon: <IoAnalytics /> },

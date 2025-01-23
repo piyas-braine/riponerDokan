@@ -49,16 +49,40 @@ const ApprovedOrdersPage: React.FC = () => {
     fetchApprovedOrders();
   }, []);
 
-  console.log(approvedOrders);
+  const handleStatusToggle = async (orderId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "PROCESSING" ? "SHIPPED" : "PROCESSING";
+
+    // Optimistically update the status in the UI
+    setApprovedOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+
+    try {
+      // Make the API call to update the status
+      await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
+    } catch (error) {
+      // Revert the status change if the API call fails
+      setApprovedOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: currentStatus } : order
+        )
+      );
+
+      // Handle error and show a toast notification or error message
+      setError("Failed to update order status. Please try again.");
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Processing Orders</h2>
+      <h2 className="text-2xl font-semibold mb-4">Approved Orders</h2>
       <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse border border-gray-200">
+        <table className="table-auto w-full text-sm border-collapse border border-gray-200">
           <thead>
             <tr>
               <th className="border border-gray-300 p-2">Order ID</th>
@@ -75,7 +99,12 @@ const ApprovedOrdersPage: React.FC = () => {
                 <td className="border border-gray-300 p-2">
                   {order.customerEmail}
                 </td>
-                <td className="border border-gray-300 p-2">{order.status}</td>
+                <td
+                  className="border border-gray-300 p-2 cursor-pointer text-blue-500 text-xs font-bold"
+                  onClick={() => handleStatusToggle(order.id, order.status)}
+                >
+                  {order.status}
+                </td>
                 <td className="border border-gray-300 p-2">
                   {order.totalAmount}
                 </td>
