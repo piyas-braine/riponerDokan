@@ -117,16 +117,15 @@ const Page: React.FC = () => {
               {products.map((product) => (
                 <tr key={product.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-700 flex justify-center items-center">
-                    {product.productImages.map((image, index) => (
-                      <Image
-                        key={index}
-                        src={"/" + image}
-                        width={40}
-                        height={40}
-                        alt="Product"
-                        className="w-16 h-16 object-cover inline-block mr-2"
-                      />
-                    ))}
+                    <Image
+                      src={`/${product.productImages[0].split("/")[1]}/${
+                        product.productImages[0].split("/")[2]
+                      }/${product.productImages[0].split("/")[3]}`}
+                      width={40}
+                      height={40}
+                      alt="Product"
+                      className="w-16 h-16 object-cover inline-block mr-2"
+                    />
                   </td>
                   <td
                     className="px-6 py-4 text-sm font-medium text-gray-800 truncate"

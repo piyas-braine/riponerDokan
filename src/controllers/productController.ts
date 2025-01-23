@@ -236,6 +236,12 @@ export const deleteProduct = async (req: NextRequest, { params }: { params: { id
             });
         }
 
+        await prisma.orderItem.deleteMany({
+            where: {
+                productId: id
+            }
+        });
+
         await prisma.product.delete({
             where: {
                 id: id
