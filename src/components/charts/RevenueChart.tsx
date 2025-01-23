@@ -1,6 +1,5 @@
 "use client";
-import { data } from "@/constants/data";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -11,10 +10,17 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import apiClient from "@/utils/apiClient"; // Replace with your actual API client
 
 const RevenueChart: React.FC = () => {
-  // Extract the unique years and months for the dropdown
-  const years = Array.from(new Set(data.map((item) => item.year)));
+  const [data, setData] = useState<any[]>([]); // All data from the API
+  const [filteredData, setFilteredData] = useState<any[]>([]); // Data filtered by year and month
+  const [years, setYears] = useState<string[]>([]); // Available years
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const months = [
     "Jan",
     "Feb",
@@ -30,15 +36,58 @@ const RevenueChart: React.FC = () => {
     "Dec",
   ];
 
-  const [selectedYear, setSelectedYear] = useState<string>(years[0].toString());
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  // Fetch orders data from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const response = await apiClient.get("/orders"); // Fetch all orders
+        const orders = response.data;
 
-  // Filter data by selected year and month
-  const filteredData = data.filter(
-    (item) =>
-      item.year.toString() === selectedYear &&
-      (selectedMonth ? item.month === selectedMonth : true)
-  );
+        // Transform the data into the desired format for the chart
+        const transformedData = orders.map((order: any) => {
+          const date = new Date(order.createdAt); // Ensure your order object has a 'createdAt' field
+          const year = date.getFullYear();
+          const month = months[date.getMonth()];
+          const day = date.getDate();
+          return {
+            year,
+            month,
+            day,
+            income: parseFloat(order.totalAmount || 0), // Ensure totalAmount is numeric
+          };
+        });
+
+        setData(transformedData);
+
+        // Extract unique years for the year dropdown
+        const uniqueYears = Array.from(
+          new Set(transformedData.map((item: any) => item.year))
+        );
+        setYears(uniqueYears);
+        setSelectedYear(uniqueYears[0]?.toString() || ""); // Set default year
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch orders. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  // Filter data when year or month changes
+  useEffect(() => {
+    if (selectedYear) {
+      const filtered = data.filter(
+        (item) =>
+          item.year.toString() === selectedYear &&
+          (selectedMonth ? item.month === selectedMonth : true)
+      );
+      setFilteredData(filtered);
+    }
+  }, [data, selectedYear, selectedMonth]);
 
   const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(event.target.value);
@@ -48,6 +97,9 @@ const RevenueChart: React.FC = () => {
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(event.target.value);
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <div className="p-4 bg-white shadow-lg rounded-lg flex-1">
