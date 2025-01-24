@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import apiClient from "@/utils/apiClient";
+import { toast } from "react-toastify";
+import DeleteModal from "@/components/deleteModal/DeleteModal";
 
 interface OrderItem {
   id: string;
@@ -30,6 +32,7 @@ const RejectedOrdersPage: React.FC = () => {
   const [rejectedOrders, setRejectedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApprovedOrders = async () => {
@@ -41,6 +44,7 @@ const RejectedOrdersPage: React.FC = () => {
         setRejectedOrders(response.data);
       } catch (err) {
         setError("Failed to fetch orders. Please try again.");
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -50,6 +54,19 @@ const RejectedOrdersPage: React.FC = () => {
   }, []);
 
   console.log(rejectedOrders);
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.delete(`/orders/${id}`);
+      setRejectedOrders((prevOrders) =>
+        prevOrders.filter((order) => order.id !== id)
+      );
+      toast.success("Order deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete the order. Please try again.");
+    }
+    setConfirmDeleteId(null); // Close the confirm modal
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -66,6 +83,7 @@ const RejectedOrdersPage: React.FC = () => {
               <th className="border border-gray-300 p-2">Status</th>
               <th className="border border-gray-300 p-2">Total Amount</th>
               <th className="border border-gray-300 p-2">Created At</th>
+              <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -79,16 +97,32 @@ const RejectedOrdersPage: React.FC = () => {
                   {order.status}
                 </td>
                 <td className="border border-gray-300 p-2">
+                  <span className="text-2xl font-bold">৳</span>
                   {order.totalAmount}
                 </td>
                 <td className="border border-gray-300 p-2">
                   {new Date(order.createdAt).toLocaleString()}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <button
+                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                    onClick={() => setConfirmDeleteId(order.id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {confirmDeleteId && (
+        <DeleteModal
+          setConfirmDeleteId={setConfirmDeleteId}
+          confirmDeleteId={confirmDeleteId}
+          handleDelete={handleDelete}
+        ></DeleteModal>
+      )}
     </div>
   );
 };

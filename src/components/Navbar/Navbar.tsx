@@ -23,10 +23,12 @@ const Navbar = () => {
   return (
     <nav className="relative z-50 flex justify-between w-full items-center px-4 py-3 bg-white">
       {/* Logo */}
-      <div className="flex items-center gap-2">
-        <Image src={logo} alt="Logo" width={31} height={29} />
-        <h2 className="text-[25px] font-bold">RiponDokan</h2>
-      </div>
+      <Link href={"/"}>
+        <div className="flex items-center gap-2">
+          <Image src={logo} alt="Logo" width={31} height={29} />
+          <h2 className="text-[25px] font-bold">RiponerDokan</h2>
+        </div>
+      </Link>
 
       {/* Menu for larger devices */}
       <div className="hidden md:flex space-x-5">
@@ -43,9 +45,6 @@ const Navbar = () => {
             </li>
           </Link>
         </ul>
-        <button className="bg-black text-white font-semibold px-5 py-2 rounded-md">
-          Sign Up
-        </button>
       </div>
 
       {/* Hamburger Menu for smaller devices */}
@@ -78,12 +77,14 @@ const Navbar = () => {
             <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
             <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
             <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
-            <li className="hover:text-gray-700 cursor-pointer">
-              <BsCart size={24} />
-            </li>
-            <button className="bg-black text-white font-semibold px-5 py-2 rounded-md">
-              Sign Up
-            </button>
+            <Link href={"myCart"}>
+              <li className="relative hover:text-gray-700 cursor-pointer">
+                <BsCart size={28} />
+                <span className="absolute top-0 right-0 flex justify-center items-center text-xs text-white bg-black rounded-full w-4 h-4">
+                  {cartLength > 0 ? cartLength : 0}
+                </span>
+              </li>
+            </Link>
           </ul>
         </div>
       )}

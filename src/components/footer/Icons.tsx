@@ -9,10 +9,10 @@ import {
 const Icons = () => {
   return (
     <div>
-      <h2 className="text-[25px] font-bold ">RiponDokan</h2>
+      <h2 className="text-[25px] font-bold ">RiponerDokan</h2>
       <p className="mt-3">
-        Complete your style with awesome <br />
-        cloths from us
+        Complete your hunger with awesome <br />
+        Ghee from us
       </p>
       <div className="mt-5 flex gap-3">
         <a

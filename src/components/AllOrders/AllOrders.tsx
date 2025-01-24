@@ -96,7 +96,7 @@ const AllOrders: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Orders</h2>
+      <h2 className="text-2xl font-semibold mb-4">New Orders</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg max-h-[80vh] overflow-auto">
           <thead className="bg-gray-100">
@@ -147,8 +147,7 @@ const AllOrders: React.FC = () => {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {order.status === "PROCESSING" ||
-                    order.status === "REJECTED" ? (
+                    {order.status === "PROCESSING" ? (
                       <span
                         className={`px-3 py-1 text-white text-sm font-medium rounded-lg ${
                           order.status === "PROCESSING"

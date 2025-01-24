@@ -1,4 +1,5 @@
 "use client";
+import DeleteModal from "@/components/deleteModal/DeleteModal";
 import { Order } from "@/types/Types";
 import apiClient from "@/utils/apiClient";
 import React, { useState, useEffect, useRef } from "react";
@@ -7,6 +8,8 @@ import { toast } from "react-toastify";
 const Page: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [ordersApi, setOrdersApi] = useState<Order[]>([]); // State to hold orders from backend
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const handleAction = async (action: string, orderId: string) => {
@@ -94,6 +97,20 @@ const Page: React.FC = () => {
     };
   }, []);
 
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.delete(`/orders/${id}`);
+      setOrdersApi((prevOrders) =>
+        prevOrders.filter((order) => order.id !== id)
+      );
+      toast.success("Order deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete the order. Please try again.");
+    }
+    setConfirmDeleteId(null); // Close the confirm modal
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Orders</h2>
@@ -122,6 +139,9 @@ const Page: React.FC = () => {
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Actions
               </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Delete
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -141,14 +161,14 @@ const Page: React.FC = () => {
                     {order.address}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    ${order.totalAmount}
+                    <span className="text-2xl font-bold">৳</span>
+                    {order.totalAmount}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {order.status === "PROCESSING" ||
-                    order.status === "REJECTED" ? (
+                    {order.status === "PROCESSING" ? (
                       <span
                         className={`px-3 py-1 text-white text-sm font-medium rounded-lg ${
                           order.status === "PROCESSING"
@@ -192,6 +212,14 @@ const Page: React.FC = () => {
                       </div>
                     )}
                   </td>
+                  <td className="border border-gray-300 p-2">
+                    <button
+                      className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                      onClick={() => setConfirmDeleteId(order.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -207,6 +235,13 @@ const Page: React.FC = () => {
           </tbody>
         </table>
       </div>
+      {confirmDeleteId && (
+        <DeleteModal
+          setConfirmDeleteId={setConfirmDeleteId}
+          confirmDeleteId={confirmDeleteId}
+          handleDelete={handleDelete}
+        ></DeleteModal>
+      )}
     </div>
   );
 };

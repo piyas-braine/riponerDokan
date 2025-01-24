@@ -4,7 +4,7 @@ import OurProductsSlider from "../ourProductsSlider/OurProductsSlider";
 
 const OurProducts = () => {
   return (
-    <div className="relative">
+    <div id="ourProducts" className="relative">
       {/* Text */}
       <h2 className="text-3xl font-extrabold relative z-10">OUR PRODUCTS</h2>
       {/* Background Image */}

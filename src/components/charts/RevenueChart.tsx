@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import apiClient from "@/utils/apiClient"; // Replace with your actual API client
+import apiClient from "@/utils/apiClient";
 
 const RevenueChart: React.FC = () => {
   const [data, setData] = useState<any[]>([]); // All data from the API
@@ -18,6 +18,7 @@ const RevenueChart: React.FC = () => {
   const [years, setYears] = useState<string[]>([]); // Available years
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [totalMonthlyIncome, setTotalMonthlyIncome] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,7 +55,8 @@ const RevenueChart: React.FC = () => {
             year,
             month,
             day,
-            income: parseFloat(order.totalAmount || 0), // Ensure totalAmount is numeric
+            income: parseFloat(order.totalAmount || 0),
+            status: order.status,
           };
         });
 
@@ -77,15 +79,20 @@ const RevenueChart: React.FC = () => {
     fetchOrders();
   }, []);
 
-  // Filter data when year or month changes
+  // Filter data when year or month changes and calculate total income
   useEffect(() => {
     if (selectedYear) {
       const filtered = data.filter(
         (item) =>
           item.year.toString() === selectedYear &&
-          (selectedMonth ? item.month === selectedMonth : true)
+          (selectedMonth ? item.month === selectedMonth : true) &&
+          item.status === "DELIVERED" // Only include DELIVERED orders
       );
       setFilteredData(filtered);
+
+      // Calculate total income for the filtered data
+      const totalIncome = filtered.reduce((sum, item) => sum + item.income, 0);
+      setTotalMonthlyIncome(totalIncome);
     }
   }, [data, selectedYear, selectedMonth]);
 
@@ -138,6 +145,16 @@ const RevenueChart: React.FC = () => {
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Total Monthly Income */}
+      <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md">
+        <h4 className="text-lg font-bold text-gray-700">
+          Total Delivered Income:{" "}
+          <span className="text-green-600">
+            ${totalMonthlyIncome.toFixed(2)}
+          </span>
+        </h4>
       </div>
 
       {/* Chart Section */}

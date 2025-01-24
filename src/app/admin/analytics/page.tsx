@@ -96,7 +96,11 @@ const Analytics = () => {
       {/* Display Total Sales */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-2">Total Sales</h2>
-        <p className="text-lg">Total Sales from Delivered Orders: ${totalSales.toFixed(2)}</p>
+        <p className="text-lg">
+          Total Sales from Delivered Orders:{" "}
+          <span className="text-2xl font-bold">৳</span>
+          {totalSales.toFixed(2)}
+        </p>
       </div>
 
       {/* Display Total Orders */}

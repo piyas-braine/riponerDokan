@@ -88,24 +88,27 @@ const OurProductsSlider: React.FC = () => {
       >
         {products.map((product) => (
           <SwiperSlide key={product.id}>
-            <div className="w-auto">
-              <Image
-                src={`/${product.productImages[0].split("/")[1]}/${
-                  product.productImages[0].split("/")[2]
-                }/${product.productImages[0].split("/")[3]}`}
-                alt={product.name}
-                width={400}
-                height={200}
-                objectFit="cover"
-                className="rounded-t-lg"
-              />
+            <div className="w-full max-w-[350px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+              {/* Image Section */}
+              <div className="relative w-full h-[200px]">
+                <Image
+                  src={`/${product.productImages[0].split("/")[1]}/${
+                    product.productImages[0].split("/")[2]
+                  }/${product.productImages[0].split("/")[3]}`}
+                  alt={product.name}
+                  layout="fill" // Makes image responsive
+                  objectFit="cover" // Ensures the image covers the container proportionally
+                  className="rounded-t-lg"
+                />
+              </div>
 
-              <div className="flex justify-between items-center mt-4">
+              {/* Details Section */}
+              <div className="p-4 flex justify-between items-center">
                 <div>
                   <h3 className="text-xl font-semibold">{product.name}</h3>
                   <p className="text-lg text-[#7F7F7F]">{product.price}</p>
                   <button
-                    onClick={() => addToCart(product)} // Call addToCart function
+                    onClick={() => addToCart(product)}
                     className="border border-black font-semibold px-3 py-1 text-sm mt-2 rounded-md"
                   >
                     Quick Add

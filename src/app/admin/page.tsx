@@ -35,7 +35,7 @@ export default function DashboardHome() {
           (order: any) => order.status === "DELIVERED"
         ).length;
         const totalSales = orders
-          .filter((order: any) => order.status === "DELIVERED") // Include only delivered orders
+          .filter((order: any) => order.status === "DELIVERED")
           .reduce(
             (sum: number, order: any) =>
               sum + parseFloat(order.totalAmount || "0"),
@@ -68,7 +68,8 @@ export default function DashboardHome() {
           <div>
             <h3 className="text-sm text-gray-600">Total Sales</h3>
             <p className="text-2xl font-semibold text-gray-800">
-              ${totalSales.toFixed(2)}
+              <span className="text-4xl font-bold">৳</span>
+              {totalSales.toFixed(2)}
             </p>
           </div>
           <div className="p-2 bg-gray-100 rounded-full">

@@ -40,7 +40,9 @@ const ProductPage = () => {
           {/* Product Image */}
           <div className="flex-shrink-0">
             <Image
-              src={`/${product.productImages[0]}`}
+              src={`/${product.productImages[0].split("/")[1]}/${
+                product.productImages[0].split("/")[2]
+              }/${product.productImages[0].split("/")[3]}`}
               alt={product.name}
               width={400}
               height={400}

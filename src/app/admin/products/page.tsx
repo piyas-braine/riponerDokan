@@ -140,7 +140,8 @@ const Page: React.FC = () => {
                     {product.description}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    ${product.price}
+                    <span className="text-2xl font-bold">৳</span>
+                    {product.price}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {product.stock}

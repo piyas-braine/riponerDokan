@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "@/utils/apiClient";
 import { toast } from "react-toastify";
+import DeleteModal from "@/components/deleteModal/DeleteModal";
 
 interface OrderItem {
   id: string;
@@ -42,6 +43,7 @@ const ApprovedOrdersPage: React.FC = () => {
         );
         setApprovedOrders(response.data);
       } catch (err) {
+        console.log(err);
         setError("Failed to fetch orders. Please try again.");
       } finally {
         setLoading(false);
@@ -54,7 +56,6 @@ const ApprovedOrdersPage: React.FC = () => {
   const handleStatusToggle = async (orderId: string, currentStatus: string) => {
     const newStatus = currentStatus === "PROCESSING" ? "SHIPPED" : "PROCESSING";
 
-    // Optimistically update the status in the UI
     setApprovedOrders((prevOrders) =>
       prevOrders.map((order) =>
         order.id === orderId ? { ...order, status: newStatus } : order
@@ -62,10 +63,9 @@ const ApprovedOrdersPage: React.FC = () => {
     );
 
     try {
-      // Make the API call to update the status
       await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
     } catch (error) {
-      // Revert the status change if the API call fails
+      console.log(error);
       setApprovedOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: currentStatus } : order
@@ -97,6 +97,7 @@ const ApprovedOrdersPage: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Approved Orders</h2>
+
       <div className="overflow-x-auto">
         <table className="table-auto w-full text-sm border-collapse border border-gray-200">
           <thead>
@@ -117,12 +118,13 @@ const ApprovedOrdersPage: React.FC = () => {
                   {order.customerEmail}
                 </td>
                 <td
-                  className="border border-gray-300 p-2 cursor-pointer text-blue-500 text-xs font-bold"
+                  className="border border-gray-300 p-2 cursor-pointer text-yellow-500 text-xs font-bold"
                   onClick={() => handleStatusToggle(order.id, order.status)}
                 >
                   {order.status}
-                </td>
+                </td>{" "}
                 <td className="border border-gray-300 p-2">
+                  <span className="text-2xl font-bold">৳</span>
                   {order.totalAmount}
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -141,29 +143,13 @@ const ApprovedOrdersPage: React.FC = () => {
           </tbody>
         </table>
       </div>
+
       {confirmDeleteId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-md w-80">
-            <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
-            <p className="text-sm mb-6">
-              Are you sure you want to delete this order?
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                onClick={() => setConfirmDeleteId(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                onClick={() => handleDelete(confirmDeleteId)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteModal
+          setConfirmDeleteId={setConfirmDeleteId}
+          confirmDeleteId={confirmDeleteId}
+          handleDelete={handleDelete}
+        ></DeleteModal>
       )}
     </div>
   );

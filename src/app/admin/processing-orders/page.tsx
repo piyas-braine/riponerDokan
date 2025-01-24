@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import apiClient from "@/utils/apiClient";
+import { toast } from "react-toastify";
+import DeleteModal from "@/components/deleteModal/DeleteModal";
 
 interface OrderItem {
   id: string;
@@ -30,6 +32,7 @@ const ShippedOrdersPage: React.FC = () => {
   const [shippedOrders, setShippedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApprovedOrders = async () => {
@@ -39,6 +42,7 @@ const ShippedOrdersPage: React.FC = () => {
         setShippedOrders(response.data);
       } catch (err) {
         setError("Failed to fetch orders. Please try again.");
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -50,7 +54,6 @@ const ShippedOrdersPage: React.FC = () => {
   const handleStatusToggle = async (orderId: string, currentStatus: string) => {
     const newStatus = currentStatus === "SHIPPED" ? "DELIVERED" : "SHIPPED";
 
-    // Optimistically update the status in the UI
     setShippedOrders((prevOrders) =>
       prevOrders.map((order) =>
         order.id === orderId ? { ...order, status: newStatus } : order
@@ -58,22 +61,34 @@ const ShippedOrdersPage: React.FC = () => {
     );
 
     try {
-      // Make the API call to update the status
       await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
     } catch (error) {
-      // Revert the status change if the API call fails
+      console.log(error);
       setShippedOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: currentStatus } : order
         )
       );
 
-      // Handle error and show a toast notification or error message
       setError("Failed to update order status. Please try again.");
     }
   };
 
   console.log(shippedOrders);
+
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.delete(`/orders/${id}`);
+      setShippedOrders((prevOrders) =>
+        prevOrders.filter((order) => order.id !== id)
+      );
+      toast.success("Order deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete the order. Please try again.");
+    }
+    setConfirmDeleteId(null); // Close the confirm modal
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -90,6 +105,7 @@ const ShippedOrdersPage: React.FC = () => {
               <th className="border border-gray-300 p-2">Status</th>
               <th className="border border-gray-300 p-2">Total Amount</th>
               <th className="border border-gray-300 p-2">Created At</th>
+              <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -106,16 +122,32 @@ const ShippedOrdersPage: React.FC = () => {
                   {order.status}
                 </td>
                 <td className="border border-gray-300 p-2">
+                  <span className="text-2xl font-bold">৳</span>
                   {order.totalAmount}
                 </td>
                 <td className="border border-gray-300 p-2">
                   {new Date(order.createdAt).toLocaleString()}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <button
+                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                    onClick={() => setConfirmDeleteId(order.id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {confirmDeleteId && (
+        <DeleteModal
+          setConfirmDeleteId={setConfirmDeleteId}
+          confirmDeleteId={confirmDeleteId}
+          handleDelete={handleDelete}
+        ></DeleteModal>
+      )}
     </div>
   );
 };
