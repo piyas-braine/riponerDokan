@@ -5,8 +5,10 @@ import EmptyCart from "@/components/myCart/EmptyCart";
 import CartItems from "@/components/myCart/CartItems";
 import OrderModal from "@/components/myCart/OrderModal";
 import Navbar from "@/components/Navbar/Navbar";
+import Footer from "@/components/footer/Footer";
 
 const MyCart = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -19,6 +21,7 @@ const MyCart = () => {
     }
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateLocalStorage = (items: any[]) => {
     localStorage.setItem("cart", JSON.stringify(items));
   };
@@ -58,6 +61,7 @@ const MyCart = () => {
       },
     });
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleOrderSubmit = async (orderData: any) => {
     try {
       console.log("Order Data:", orderData);
@@ -191,6 +195,9 @@ const MyCart = () => {
           cartItems={cartItems}
         />
         <ToastContainer></ToastContainer>
+      </div>
+      <div className=" mt-16">
+        <Footer></Footer>
       </div>
     </div>
   );

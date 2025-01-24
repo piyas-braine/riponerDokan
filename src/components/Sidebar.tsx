@@ -47,7 +47,7 @@ const Sidebar = ({
     handleResize(); // Initial check
 
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [setIsOpen]);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen); // Toggle the sidebar visibility

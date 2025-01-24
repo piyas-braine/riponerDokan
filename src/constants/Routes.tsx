@@ -6,9 +6,6 @@ import { FaCheckCircle } from "react-icons/fa"; // Approved Orders Icon
 import { FaTimesCircle } from "react-icons/fa"; // Rejected Orders Icon
 import { FaHourglassHalf } from "react-icons/fa"; // Pending Orders Icon
 import { FaChartLine } from "react-icons/fa"; // Sales Overview Icon
-
-import { FaUserFriends } from "react-icons/fa"; // User Management Icon
-import { FaCog } from "react-icons/fa"; // Settings Icon
 import { IoAnalytics } from "react-icons/io5";
 import { AiOutlineDeliveredProcedure } from "react-icons/ai";
 
@@ -46,6 +43,4 @@ export const routes: Route[] = [
   },
   { name: "Sales Overview", path: "/admin/sales", icon: <FaChartLine /> },
   { name: "Analytics", path: "/admin/analytics", icon: <IoAnalytics /> },
-  { name: "User Management", path: "/admin/users", icon: <FaUserFriends /> },
-  { name: "Settings", path: "/admin/settings", icon: <FaCog /> },
 ];
