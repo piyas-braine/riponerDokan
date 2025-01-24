@@ -66,9 +66,9 @@ const AllOrders: React.FC = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await apiClient.get("orders?status=PENDING"); // Adjust the API endpoint as needed
+        const response = await apiClient.get("orders?status=PENDING");
         if (response.data) {
-          setOrdersApi(response.data); // Set the fetched data
+          setOrdersApi(response.data);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);

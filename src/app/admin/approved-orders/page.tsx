@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import apiClient from "@/utils/apiClient";
+import { toast } from "react-toastify";
 
 interface OrderItem {
   id: string;
@@ -30,6 +31,7 @@ const ApprovedOrdersPage: React.FC = () => {
   const [approvedOrders, setApprovedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApprovedOrders = async () => {
@@ -75,6 +77,20 @@ const ApprovedOrdersPage: React.FC = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.delete(`/orders/${id}`);
+      setApprovedOrders((prevOrders) =>
+        prevOrders.filter((order) => order.id !== id)
+      );
+      toast.success("Order deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete the order. Please try again.");
+    }
+    setConfirmDeleteId(null); // Close the confirm modal
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
 
@@ -90,6 +106,7 @@ const ApprovedOrdersPage: React.FC = () => {
               <th className="border border-gray-300 p-2">Status</th>
               <th className="border border-gray-300 p-2">Total Amount</th>
               <th className="border border-gray-300 p-2">Created At</th>
+              <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -111,11 +128,43 @@ const ApprovedOrdersPage: React.FC = () => {
                 <td className="border border-gray-300 p-2">
                   {new Date(order.createdAt).toLocaleString()}
                 </td>
+                <td className="border border-gray-300 p-2">
+                  <button
+                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                    onClick={() => setConfirmDeleteId(order.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {confirmDeleteId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-md w-80">
+            <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
+            <p className="text-sm mb-6">
+              Are you sure you want to delete this order?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                onClick={() => setConfirmDeleteId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={() => handleDelete(confirmDeleteId)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
