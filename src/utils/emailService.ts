@@ -28,30 +28,69 @@ type TOrderEmailData = {
 export const sendOrderConfirmationEmail = async (orderData: TOrderEmailData) => {
     const itemsList = orderData.items
         .map(
-            item =>
-                `- ${item.productName} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`
+            item => `
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${item.productName}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${item.quantity}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">BDT ${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+            `
         )
-        .join('\n');
+        .join('');
 
     const emailContent = `
-    <h2>Order Confirmation</h2>
-    <p>Thank you for your order! Here are your order details:</p>
-    
-    <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-    
-    <h3>Items:</h3>
-    <pre>${itemsList}</pre>
-    
-    <p><strong>Total Amount:</strong> BDT. ${orderData.totalAmount.toFixed(2)}</p>
-
-    <p><strong>Delivery Charge:</strong> BDT. ${orderData.deliveryCharge.toFixed(2)}</p>
-
-    <p><strong>Sub Total:</strong> BDT. ${orderData.subTotal.toFixed(2)}</p>
-
-    <p><strong>Tracking Link:</strong> <a href="${orderData.trackingLink}">${orderData.trackingLink}</a></p>
-    
-    <p>If you have any questions about your order, please contact our support team.</p>
-  `;
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #f9f9f9;">
+            <h2 style="text-align: center; color: #007BFF;">Order Confirmation</h2>
+            <p style="text-align: center; font-size: 16px;">Thank you for your order! Below are your order details:</p>
+        
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        
+            <p style="font-size: 16px;"><strong>Order Number:</strong> <span style="color: #007BFF;">${orderData.orderNumber}</span></p>
+        
+            <h3 style="color: #333; margin-top: 20px;">Items:</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <thead>
+                <tr style="background-color: #007BFF; color: #fff; text-align: left;">
+                  <th style="padding: 10px; border: 1px solid #ddd;">Item</th>
+                  <th style="padding: 10px; border: 1px solid #ddd;">Quantity</th>
+                  <th style="padding: 10px; border: 1px solid #ddd;">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsList}
+              </tbody>
+            </table>
+        
+            <div style="margin-top: 20px;">
+              <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr>
+                  <td style="padding: 10px; border: 1px solid #ddd;"><strong>Total Amount:</strong></td>
+                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">BDT ${orderData.totalAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid #ddd;"><strong>Delivery Charge:</strong></td>
+                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">BDT ${orderData.deliveryCharge.toFixed(2)}</td>
+                </tr>
+                <tr style="background-color: #f1f1f1;">
+                  <td style="padding: 10px; border: 1px solid #ddd;"><strong>Sub Total (Amount to Pay):</strong></td>
+                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>BDT ${orderData.subTotal.toFixed(2)}</strong></td>
+                </tr>
+              </table>
+            </div>
+        
+            <p style="font-size: 16px; margin-top: 20px;">
+              <strong>Tracking Link:</strong> 
+              <a href="${orderData.trackingLink}" style="color: #007BFF;">Track Your Order</a>
+            </p>
+        
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        
+            <p style="text-align: center; font-size: 14px; color: #555;">If you have any questions about your order, please <a href="mailto:support@yourcompany.com" style="color: #007BFF;">contact our support team</a>.</p>
+            <p style="text-align: center; font-size: 14px; color: #555;">Thank you for shopping with us!</p>
+          </div>
+        </div>
+    `;
 
     await transporter.sendMail({
         from: process.env.SMTP_FROM_ADDRESS,
