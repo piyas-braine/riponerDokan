@@ -35,6 +35,9 @@ export default function ProductDetailsCart({ product }: { product: Product }) {
       draggable: true,
       theme: "colored",
     });
+
+    // Redirect to "myCart" route
+    window.location.href = "/myCart";
   };
 
   return (

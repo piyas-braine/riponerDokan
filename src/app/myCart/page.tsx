@@ -173,7 +173,8 @@ const MyCart = () => {
               {/* Total Price and Checkout */}
               <div className="flex flex-col md:flex-row justify-center gap-5 items-center mt-6">
                 <h3 className="text-base md:text-xl font-bold text-gray-800">
-                  Total: ${totalPrice.toFixed(2)}
+                  Total: <span className="text-4xl font-bold">৳</span>
+                  {totalPrice.toFixed(2)}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(true)}

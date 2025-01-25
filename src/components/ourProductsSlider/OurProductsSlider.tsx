@@ -63,6 +63,9 @@ const OurProductsSlider: React.FC = () => {
       draggable: true,
       theme: "colored",
     });
+
+    // Redirect to "myCart" route
+    window.location.href = "/myCart";
   };
 
   return (
