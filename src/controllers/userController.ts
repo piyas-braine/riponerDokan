@@ -103,8 +103,8 @@ export const loginUser = async (
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
-            return new NextResponse(JSON.stringify({ error: 'Invalid credentials' }), {
-                status: 401
+            return new NextResponse(JSON.stringify({ error: 'User Not Found...' }), {
+                status: 404
             });
         }
 
