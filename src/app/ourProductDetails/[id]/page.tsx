@@ -5,7 +5,7 @@ import Footer from "@/components/footer/Footer";
 import { Truck, ShieldCheck } from "lucide-react";
 
 async function fetchProduct(id: string) {
-  const fetchUrl = `http://localhost:3001/api/products/${id}`;
+  const fetchUrl = `http://localhost:3000/api/products/${id}`;
   const res = await fetch(fetchUrl, { cache: "no-store" });
   if (!res.ok) {
     throw new Error("Failed to fetch product");

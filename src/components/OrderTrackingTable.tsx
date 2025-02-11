@@ -31,7 +31,7 @@ const OrderTrackingTable = ({
       {/* Order Status */}
       <div className="bg-white shadow-md rounded-xl p-6">
         <div className="flex justify-between items-center border-b pb-4">
-          <h2 className="text-xl font-bold text-gray-900">Order #{id?.slice(0,8)}</h2>
+          <h2 className="text-xl font-bold text-gray-900">Order #{id}</h2>
           <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
             {status}
           </span>
@@ -58,7 +58,7 @@ const OrderTrackingTable = ({
                   <td className="text-right p-3">BDT. {Number(item?.price)?.toFixed(2)}</td>
                   <td className="text-right p-3">{item?.quantity}</td>
                   <td className="text-right p-3 font-medium text-black">
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                    BDT{(item.price * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))}
