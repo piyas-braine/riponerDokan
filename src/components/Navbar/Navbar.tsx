@@ -83,7 +83,11 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="absolute top-full left-0 w-full bg-white md:hidden z-50">
           <ul className="flex flex-col items-center space-y-4 py-4 font-semibold">
-            {/* <li className="hover:text-gray-700 cursor-pointer">Products</li> */}
+            <Link href={"/orders"}>
+              <li className="hover:text-gray-700 cursor-pointer">
+                Track Your Order
+              </li>
+            </Link>{" "}
             <Link href={"myCart"}>
               <li className="relative hover:text-gray-700 cursor-pointer">
                 <BiShoppingBag size={28} />
