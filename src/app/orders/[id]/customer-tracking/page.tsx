@@ -1,5 +1,6 @@
 "use client";
 
+import Navbar from "@/components/Navbar/Navbar";
 import OrderTrackingTable from "@/components/OrderTrackingTable";
 import { useEffect, useState } from "react";
 
@@ -34,7 +35,7 @@ const OrderTracking = ({ params }: { params: { id: string } }) => {
       try {
         if (orderId) {
           const response = await fetch(
-            `http://localhost:3002/api/orders/${orderId}/customer-tracking`,
+            `http://localhost:3000/api/orders/${orderId}/customer-tracking`,
             {
               method: "GET",
               headers: {
@@ -54,15 +55,17 @@ const OrderTracking = ({ params }: { params: { id: string } }) => {
     fetchOrder();
   }, [orderId]);
 
-  if (!order) {
-    return <h2>Loading...</h2>;
-  }
-
   return (
-    <div className="container mx-auto">
+    <div className="py-2 container mx-auto">
+      <Navbar />
       <h1 className="pt-10 text-2xl text-center font-bold">Order Tracking</h1>
+
       <div className="mt-4">
-        <OrderTrackingTable {...order} />
+        {order ? (
+          <OrderTrackingTable {...order} />
+        ) : (
+          <h2>No Order available with this number...</h2>
+        )}
       </div>
     </div>
   );

@@ -163,28 +163,8 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
             const productImagesPath = productImages.map((ProductImage: TProductImages) => ProductImage.path.replaceAll('\\', '/'));
 
             const updatedImagesPath = [
-                ...(Array.isArray(product?.productImages) ? product.productImages : []),
                 ...productImagesPath,
             ];
-
-            if (updatedImagesPath.length > 5) {
-                const sliceAmount = updatedImagesPath.length - 5;
-                const slicedImagesPath = updatedImagesPath.slice(sliceAmount);
-
-                await prisma.product.update({
-                    where: {
-                        id: id
-                    },
-                    data: {
-                        ...updateProductInfo,
-                        productImages: slicedImagesPath,
-                    }
-                });
-
-                return new NextResponse(JSON.stringify({ message: 'Product updated successfully' }), {
-                    status: 200
-                });
-            }
 
             await prisma.product.update({
                 where: {
