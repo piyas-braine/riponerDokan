@@ -126,7 +126,8 @@ export const getOrder = async (
 // create an order
 export const createOrder = async (req: NextRequest) => {
   const orderInfo: TOrderInfo = await req.json();
-  console.log(orderInfo);
+  // console.log(orderInfo);
+  //   return new NextResponse(JSON.stringify("Hello world"));
   try {
     const order = await prisma.order.create({
       data: {
