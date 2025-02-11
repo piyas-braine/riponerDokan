@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
 import React, { useState, useEffect } from "react";
 import {
   LineChart,
@@ -14,11 +13,13 @@ import {
 import apiClient from "@/utils/apiClient";
 
 const RevenueChart: React.FC = () => {
-  const [data, setData] = useState<any[]>([]); // All data from the API
-  const [filteredData, setFilteredData] = useState<any[]>([]); // Data filtered by year and month
-  const [years, setYears] = useState<string[]>([]); // Available years
+  const [data, setData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [years, setYears] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("");
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
+    undefined
+  );
   const [totalMonthlyIncome, setTotalMonthlyIncome] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,7 @@ const RevenueChart: React.FC = () => {
       try {
         const response = await apiClient.get("/orders");
         const orders = response.data;
+        console.log("Orders from API:", orders);
 
         const transformedData = orders.map((order: any) => {
           const date = new Date(order.createdAt);
@@ -63,10 +65,11 @@ const RevenueChart: React.FC = () => {
 
         const uniqueYears = Array.from(
           new Set(transformedData.map((item: any) => String(item.year)))
-        );
-
-        setYears(uniqueYears as string[]);
-        setSelectedYear(uniqueYears[0]?.toString() || "");
+        ) as string[];
+        setYears(uniqueYears);
+        if (!selectedYear && uniqueYears.length > 0) {
+          setSelectedYear(uniqueYears[0]);
+        }
       } catch (err) {
         console.error(err);
         setError("Failed to fetch orders. Please try again.");
@@ -80,16 +83,26 @@ const RevenueChart: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (selectedMonth === undefined) {
+      const currentMonthAbbr = months[new Date().getMonth()];
+      setSelectedMonth(currentMonthAbbr);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (selectedYear) {
-      const filtered = data.filter(
-        (item) =>
+      const filtered = data.filter((item) => {
+        return (
           item.year.toString() === selectedYear &&
-          (selectedMonth ? item.month === selectedMonth : true) &&
-          item.status === "DELIVERED" // Only include DELIVERED orders
-      );
+          (selectedMonth !== undefined && selectedMonth !== ""
+            ? item.month === selectedMonth
+            : true) &&
+          item.status === "DELIVERED"
+        );
+      });
       setFilteredData(filtered);
 
-      // Calculate total income for the filtered data
       const totalIncome = filtered.reduce((sum, item) => sum + item.income, 0);
       setTotalMonthlyIncome(totalIncome);
     }
@@ -97,7 +110,8 @@ const RevenueChart: React.FC = () => {
 
   const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(event.target.value);
-    setSelectedMonth(""); // Reset month when changing year
+
+    setSelectedMonth("");
   };
 
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -131,11 +145,12 @@ const RevenueChart: React.FC = () => {
         <div className="flex items-center space-x-2">
           <label className="text-gray-600">Month:</label>
           <select
-            value={selectedMonth}
+            value={selectedMonth ?? ""}
             onChange={handleMonthChange}
             className="p-2 border rounded-lg bg-white"
             disabled={!selectedYear}
           >
+            {/* "All" option represented by an empty string */}
             <option value="">All</option>
             {months.map((month) => (
               <option key={month} value={month}>
