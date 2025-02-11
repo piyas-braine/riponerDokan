@@ -161,7 +161,7 @@ export const createOrder = async (req: NextRequest) => {
           totalAmount: Number(order.totalAmount),
           deliveryCharge: Number(order.deliveryCharge),
           subTotal: Number(order.subTotal),
-          trackingLink: `http://localhost:3000/orders/${order.id}/customer-tracking`,
+          trackingLink: `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${order.id}/customer-tracking`,
         });
       } catch (emailError) {
         console.error("Failed to send order confirmation email:", emailError);

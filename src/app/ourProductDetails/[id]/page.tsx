@@ -2,10 +2,11 @@ import Image from "next/image";
 import ProductDetailsCart from "@/components/productDetails/ProductDetailsCart";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/footer/Footer";
-import { Truck, ShieldCheck } from "lucide-react";
+import { Truck, ShieldCheck, Star } from "lucide-react";
+import Banner from "@/components/banner/Banner";
 
 async function fetchProduct(id: string) {
-  const fetchUrl = `http://localhost:3001/api/products/${id}`;
+  const fetchUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${id}`;
   const res = await fetch(fetchUrl, { cache: "no-store" });
   if (!res.ok) {
     throw new Error("Failed to fetch product");
@@ -38,7 +39,7 @@ export default async function ProductDetails({
         <div className="p-5">
           <Navbar />
         </div>
-
+        <Banner></Banner>
         <main className="flex-1">
           {/* Split Layout Container */}
           <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]">
@@ -60,16 +61,13 @@ export default async function ProductDetails({
             <div className="flex items-center justify-center p-12">
               <div className="max-w-md space-y-6">
                 {/* Category and Rating */}
-                {/* <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1 text-amber-400">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-current" />
                     ))}
-                    <span className="text-sm text-gray-500 ml-1">
-                      (42 reviews)
-                    </span>
                   </div>
-                </div> */}
+                </div>
 
                 {/* Product Name */}
                 <h1 className="text-4xl font-bold text-gray-900">{name}</h1>
@@ -87,7 +85,7 @@ export default async function ProductDetails({
                 {stock > 0 ? (
                   <p className="text-sm text-green-600 flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    In Stock ({stock} available)
+                    In Stock
                   </p>
                 ) : (
                   <p className="text-sm text-red-600">Out of Stock</p>
@@ -102,7 +100,7 @@ export default async function ProductDetails({
                 <div className="flex items-center gap-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Truck className="w-5 h-5 text-gray-700" />
-                    <span>Fast Delivery</span>
+                    <span>Fastest Delivery</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <ShieldCheck className="w-5 h-5 text-gray-700" />
