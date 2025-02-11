@@ -5,10 +5,13 @@ import EmptyCart from "@/components/myCart/EmptyCart";
 import CartItems from "@/components/myCart/CartItems";
 import OrderModal from "@/components/myCart/OrderModal";
 import Navbar from "@/components/Navbar/Navbar";
+import Footer from "@/components/footer/Footer";
 
 const MyCart = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
@@ -19,6 +22,7 @@ const MyCart = () => {
     }
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateLocalStorage = (items: any[]) => {
     localStorage.setItem("cart", JSON.stringify(items));
   };
@@ -45,37 +49,50 @@ const MyCart = () => {
     const updatedItems = cartItems.filter((item) => item.id !== id);
     setCartItems(updatedItems);
     updateLocalStorage(updatedItems);
-    toast.success("Item has been removed from your cart!", {
+
+    toast.error("Item has been removed from your cart!", {
       position: "top-right",
-      autoClose: 3000,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
       theme: "colored",
-      style: {
-        backgroundColor: "red",
-      },
     });
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleOrderSubmit = async (orderData: any) => {
+    if (isSubmitting) return; // Prevent multiple submissions
+
+    setIsSubmitting(true); // Disable submit button
+    setIsModalOpen(false); // Close modal immediately
+
     try {
       console.log("Order Data:", orderData);
 
-      // Send the order data to the backend
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(orderData), // Convert orderData to JSON string
+        body: JSON.stringify(orderData),
       });
 
       if (response.ok) {
-        // Handle success
+        setCartItems([]);
+        localStorage.removeItem("cart");
+
+        const result = await response.json();
+        console.log("Order Response:", result);
+
         toast.success("Your order has been placed successfully!", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -83,15 +100,10 @@ const MyCart = () => {
           theme: "colored",
         });
 
-        // Reset modal and cart
-        setIsModalOpen(false);
-        setCartItems([]);
-        localStorage.removeItem("cart");
-
-        const result = await response.json();
-        console.log("Order Response:", result);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2500);
       } else {
-        // Handle error response
         toast.error("Failed to place the order. Please try again!", {
           position: "top-right",
           autoClose: 3000,
@@ -104,7 +116,6 @@ const MyCart = () => {
         console.error("Order placement failed:", response.statusText);
       }
     } catch (error) {
-      // Handle network errors
       console.error("Error placing order:", error);
       toast.error("Something went wrong. Please try again!", {
         position: "top-right",
@@ -115,6 +126,8 @@ const MyCart = () => {
         draggable: true,
         theme: "colored",
       });
+    } finally {
+      setIsSubmitting(false); // Re-enable button after request completion
     }
   };
 
@@ -169,7 +182,8 @@ const MyCart = () => {
               {/* Total Price and Checkout */}
               <div className="flex flex-col md:flex-row justify-center gap-5 items-center mt-6">
                 <h3 className="text-base md:text-xl font-bold text-gray-800">
-                  Total: ${totalPrice.toFixed(2)}
+                  Total: <span className="text-4xl font-bold">৳</span>
+                  {totalPrice.toFixed(2)}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(true)}
@@ -191,6 +205,9 @@ const MyCart = () => {
           cartItems={cartItems}
         />
         <ToastContainer></ToastContainer>
+      </div>
+      <div className=" mt-16">
+        <Footer></Footer>
       </div>
     </div>
   );

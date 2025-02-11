@@ -8,6 +8,7 @@ type Product = {
   price: number;
   image: string;
   description: string;
+  quantity?: number;
 };
 
 export default function ProductDetailsCart({ product }: { product: Product }) {
@@ -34,6 +35,9 @@ export default function ProductDetailsCart({ product }: { product: Product }) {
       draggable: true,
       theme: "colored",
     });
+
+    // Redirect to "myCart" route
+    window.location.href = "/myCart";
   };
 
   return (

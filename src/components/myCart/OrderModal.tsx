@@ -71,7 +71,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
       customerEmail,
       customerPhone,
       address,
-      totalAmount: totalPrice,
+      totalAmount: totalPrice + deliveryCharge,
       deliveryCharge,
       items: cartItems.map((item) => ({
         productId: item.id,

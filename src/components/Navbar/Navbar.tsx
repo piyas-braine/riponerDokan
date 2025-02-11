@@ -12,15 +12,14 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartLength, setCartLength] = useState<number>(0);
 
-  // Fetch cart length from localStorage
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       const cartItems = JSON.parse(storedCart);
-      setCartLength(cartItems.length); // Set the length of items in cart
-      console.log("Cart Items:", cartItems); // Debug
+      setCartLength(cartItems.length);
+      console.log("Cart Items:", cartItems);
     }
-  }, []);
+  }, [cartLength]);
 
   return (
     <nav className="relative z-50 flex justify-between w-full items-center px-4 py-1 bg-white">

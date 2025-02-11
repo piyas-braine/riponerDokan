@@ -63,6 +63,9 @@ const OurProductsSlider: React.FC = () => {
       draggable: true,
       theme: "colored",
     });
+
+    // Redirect to "myCart" route
+    window.location.href = "/myCart";
   };
 
   return (
@@ -106,7 +109,10 @@ const OurProductsSlider: React.FC = () => {
               <div className="p-4 flex justify-between items-center">
                 <div>
                   <h3 className="text-xl font-semibold">{product.name}</h3>
-                  <p className="text-lg text-[#7F7F7F]">{product.price}</p>
+                  <p className="text-lg text-[#7F7F7F]">
+                    <span className="text-2xl">৳</span>
+                    {product.price}
+                  </p>
                   <button
                     onClick={() => addToCart(product)}
                     className="border border-black font-semibold px-3 py-1 text-sm mt-2 rounded-md"

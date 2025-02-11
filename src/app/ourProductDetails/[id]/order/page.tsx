@@ -6,8 +6,9 @@ import { products } from "../../../../data/products";
 import { use } from "react"; // Import use to unwrap the promise
 
 export default function OrderPage({ params }: { params: { id: string } }) {
-  const unwrappedParams = use(params); // Unwrap the params object
-  const [product, setProduct] = useState<any>(null); // Initial product state
+  const unwrappedParams = use(Promise.resolve(params)) as { id: string };
+  console.log("Unwrapped Params:", unwrappedParams); // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [product, setProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -26,16 +27,16 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       console.log("Product loaded:", product); // Debugging log
       const numericPrice = parseFloat(product.price.replace("$", "")); // Convert price to number
       if (!isNaN(numericPrice)) {
-        setTotalPrice(quantity * numericPrice); // Calculate total price
+        setTotalPrice(quantity * numericPrice);
       } else {
-        console.log("Invalid product price:", product.price); // Debugging log
-        setTotalPrice(0); // Set to 0 if product price is invalid
+        console.log("Invalid product price:", product.price);
+        setTotalPrice(0);
       }
     }
   }, [quantity, product]);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuantity = Math.max(1, Number(e.target.value)); // Ensure quantity is at least 1
+    const newQuantity = Math.max(1, Number(e.target.value));
     setQuantity(newQuantity);
   };
 

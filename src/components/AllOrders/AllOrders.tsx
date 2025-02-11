@@ -141,7 +141,8 @@ const AllOrders: React.FC = () => {
                     {order.address}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    ${order.totalAmount}
+                    <span className="text-xl">৳</span>
+                    {order.totalAmount}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {new Date(order.createdAt).toLocaleDateString()}

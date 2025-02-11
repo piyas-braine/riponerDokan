@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AllOrders from "@/components/AllOrders/AllOrders";
 import OrderStatusPieChart from "@/components/charts/OrderStatusPieChart";
 import RevenueChart from "@/components/charts/RevenueChart";
 import {
@@ -9,7 +8,13 @@ import {
   FaShoppingCart,
   FaUsers,
 } from "react-icons/fa";
-import apiClient from "@/utils/apiClient"; // Replace with your actual API client import
+import apiClient from "@/utils/apiClient";
+
+type Order = {
+  id: string;
+  status: "PENDING" | "DELIVERED" | "CANCELLED";
+  totalAmount: string | number;
+};
 
 export default function DashboardHome() {
   const [totalSales, setTotalSales] = useState<number>(0);
@@ -23,22 +28,24 @@ export default function DashboardHome() {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get("/orders"); // Adjust the endpoint to your API
+        const response = await apiClient.get("/orders");
         const orders = response.data;
 
         // Calculate metrics
         const totalOrders = orders.length;
         const pendingOrders = orders.filter(
-          (order: any) => order.status === "PENDING"
+          (order: Order) => order.status === "PENDING"
         ).length;
+
         const deliveredOrders = orders.filter(
-          (order: any) => order.status === "DELIVERED"
+          (order: Order) => order.status === "DELIVERED"
         ).length;
+
         const totalSales = orders
-          .filter((order: any) => order.status === "DELIVERED")
+          .filter((order: Order) => order.status === "DELIVERED")
           .reduce(
-            (sum: number, order: any) =>
-              sum + parseFloat(order.totalAmount || "0"),
+            (sum: number, order: Order) =>
+              sum + parseFloat(order.totalAmount.toString()), // Ensure it's parsed as a number
             0
           );
 
@@ -118,12 +125,10 @@ export default function DashboardHome() {
       </div>
 
       {/* Revenue and Order Status Charts */}
-      <div className="flex md:items-center gap-2 flex-col md:flex-row w-full mx-4 md:mx-0">
+      <div className="flex lg:items-center gap-2 flex-col lg:flex-row w-full  md:mx-0 p-4 border">
         <RevenueChart />
         <OrderStatusPieChart />
       </div>
-
-      <AllOrders />
     </div>
   );
 }
