@@ -26,7 +26,13 @@ const Navbar = () => {
       {/* Logo */}
       <Link href={"/"}>
         <div className="flex items-center gap-3">
-          <Image src={logo} alt="Logo" width={60} height={40} className="object-contain" />
+          <Image
+            src={logo}
+            alt="Logo"
+            width={60}
+            height={40}
+            className="object-contain"
+          />
           <h2 className="text-2xl font-bold">Ripon Miar Dokan</h2>
         </div>
       </Link>
@@ -34,8 +40,12 @@ const Navbar = () => {
       {/* Menu for larger devices */}
       <div className="hidden md:flex space-x-5">
         <ul className="flex items-center space-x-8 font-semibold">
-          <li className="hover:text-gray-700 cursor-pointer">Products</li>
-          <Link href={"myCart"}>
+          <Link href={"/orders"}>
+            <li className="hover:text-gray-700 cursor-pointer">
+              Track Your Order
+            </li>
+          </Link>
+          <Link href={"/myCart"}>
             <li className="relative hover:text-gray-700 cursor-pointer">
               <BiShoppingBag size={28} />
               <span className="absolute -top-0 -right-1 flex justify-center items-center text-xs text-white bg-black rounded-full w-4 h-4">
