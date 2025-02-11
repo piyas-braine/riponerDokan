@@ -76,7 +76,7 @@ const Navbar = () => {
             <li className="hover:text-gray-700 cursor-pointer">Catalogue</li>
             <li className="hover:text-gray-700 cursor-pointer">Fashion</li>
             <li className="hover:text-gray-700 cursor-pointer">Favourite</li>
-            <Link href={"myCart"}>
+            <Link href={"/myCart"}>
               <li className="relative hover:text-gray-700 cursor-pointer">
                 <BsCart size={28} />
                 <span className="absolute top-0 right-0 flex justify-center items-center text-xs text-white bg-black rounded-full w-4 h-4">
