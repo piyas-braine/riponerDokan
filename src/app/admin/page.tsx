@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AllOrders from "@/components/AllOrders/AllOrders";
 import OrderStatusPieChart from "@/components/charts/OrderStatusPieChart";
 import RevenueChart from "@/components/charts/RevenueChart";
 import {
@@ -126,12 +125,10 @@ export default function DashboardHome() {
       </div>
 
       {/* Revenue and Order Status Charts */}
-      <div className="flex md:items-center gap-2 flex-col md:flex-row w-full mx-4 md:mx-0">
+      <div className="flex lg:items-center gap-2 flex-col lg:flex-row w-full  md:mx-0 p-4 border">
         <RevenueChart />
         <OrderStatusPieChart />
       </div>
-
-      <AllOrders />
     </div>
   );
 }

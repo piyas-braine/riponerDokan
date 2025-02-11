@@ -26,49 +26,52 @@ type TOrderInfo = {
 // get all orders
 export const getAllOrders = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
-  const status = searchParams.get('status') as OrderStatus | undefined;
+  const status = searchParams.get("status") as OrderStatus | undefined;
 
   try {
-      const authHeader = req.headers.get('authorization');
-      const token = authHeader?.split(' ')[1];
+    const authHeader = req.headers.get("authorization");
+    const token = authHeader?.split(" ")[1];
 
-      const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'ADMIN' });
+    const isAuthenticated = await authenticateUser({
+      token: token as string,
+      requiredRole: "ADMIN",
+    });
 
-      if (!isAuthenticated) {
-          return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-              status: 401
-          });
-      }
+    if (!isAuthenticated) {
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
+    }
 
-      if (status) {
-          const orders = await prisma.order.findMany({
-              where: {
-                  status: status
-              },
-              include: {
-                  items: true
-              }
-          });
-
-          return new NextResponse(JSON.stringify(orders), {
-              status: 200
-          });
-      }
-
+    if (status) {
       const orders = await prisma.order.findMany({
-          include: {
-              items: true
-          }
+        where: {
+          status: status,
+        },
+        include: {
+          items: true,
+        },
       });
 
       return new NextResponse(JSON.stringify(orders), {
-          status: 200
+        status: 200,
       });
+    }
+
+    const orders = await prisma.order.findMany({
+      include: {
+        items: true,
+      },
+    });
+
+    return new NextResponse(JSON.stringify(orders), {
+      status: 200,
+    });
   } catch (error) {
-      console.log(error);
-      return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
-          status: 500
-      });
+    console.log(error);
+    return new NextResponse(JSON.stringify({ error: "Something went wrong" }), {
+      status: 500,
+    });
   }
 };
 
@@ -124,7 +127,6 @@ export const getOrder = async (
 export const createOrder = async (req: NextRequest) => {
   const orderInfo: TOrderInfo = await req.json();
   console.log(orderInfo);
-  //   return new NextResponse(JSON.stringify("Hello world"));
   try {
     const order = await prisma.order.create({
       data: {

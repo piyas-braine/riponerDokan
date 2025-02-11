@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -37,17 +38,15 @@ const RevenueChart: React.FC = () => {
     "Dec",
   ];
 
-  // Fetch orders data from API
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get("/orders"); // Fetch all orders
+        const response = await apiClient.get("/orders");
         const orders = response.data;
 
-        // Transform the data into the desired format for the chart
         const transformedData = orders.map((order: any) => {
-          const date = new Date(order.createdAt); // Ensure your order object has a 'createdAt' field
+          const date = new Date(order.createdAt);
           const year = date.getFullYear();
           const month = months[date.getMonth()];
           const day = date.getDate();
@@ -62,12 +61,12 @@ const RevenueChart: React.FC = () => {
 
         setData(transformedData);
 
-        // Extract unique years for the year dropdown
         const uniqueYears = Array.from(
-          new Set(transformedData.map((item: any) => item.year))
+          new Set(transformedData.map((item: any) => String(item.year)))
         );
-        setYears(uniqueYears);
-        setSelectedYear(uniqueYears[0]?.toString() || ""); // Set default year
+
+        setYears(uniqueYears as string[]);
+        setSelectedYear(uniqueYears[0]?.toString() || "");
       } catch (err) {
         console.error(err);
         setError("Failed to fetch orders. Please try again.");
@@ -77,9 +76,9 @@ const RevenueChart: React.FC = () => {
     };
 
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Filter data when year or month changes and calculate total income
   useEffect(() => {
     if (selectedYear) {
       const filtered = data.filter(
@@ -151,14 +150,15 @@ const RevenueChart: React.FC = () => {
       <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md">
         <h4 className="text-lg font-bold text-gray-700">
           Total Delivered Income:{" "}
+          <span className="text-3xl text-green-600">৳</span>
           <span className="text-green-600">
-            ${totalMonthlyIncome.toFixed(2)}
+            {totalMonthlyIncome.toFixed(2)}
           </span>
         </h4>
       </div>
 
       {/* Chart Section */}
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="90%" height={300}>
         <LineChart data={filteredData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="day" />

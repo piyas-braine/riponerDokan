@@ -8,39 +8,31 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import apiClient from "@/utils/apiClient"; // Replace with your actual API client
+import apiClient from "@/utils/apiClient";
 
 const OrderStatusPieChart: React.FC = () => {
-  const [orderData, setOrderData] = useState<any[]>([]); // Dynamic order data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [orderData, setOrderData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Define colors for each segment
-  const COLORS = [
-    "#FFB6C1", // Light rose for Cancelled
-    "#FFEB99", // Light yellow for Pending
-    "#A9A9A9", // Dark gray for Approved
-    "#808080", // Gray for Processing
-    "#D3D3D3", // Lighter gray for Rejected
-  ];
+  const COLORS = ["#FFB6C1", "#FFEB99", "#A9A9A9", "#808080", "#D3D3D3"];
 
-  // Fetch order statuses from the API
   useEffect(() => {
     const fetchOrderStatuses = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get("/orders"); // Adjust the endpoint to your API
+        const response = await apiClient.get("/orders");
         const orders = response.data;
 
-        // Aggregate the counts for each status
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const statusCounts = orders.reduce((acc: any, order: any) => {
-          const status = order.status; // Ensure your API provides a 'status' field
+          const status = order.status;
           if (!acc[status]) acc[status] = 0;
-          acc[status] += 1; // Increment count for each status
+          acc[status] += 1;
           return acc;
         }, {});
 
-        // Transform aggregated data into a format suitable for the chart
         const transformedData = Object.entries(statusCounts).map(
           ([status, count]) => ({ status, count })
         );
@@ -58,7 +50,10 @@ const OrderStatusPieChart: React.FC = () => {
   }, []);
 
   // Calculate the total count of all orders
-  const totalOrders = orderData.reduce((total, order) => total + order.count, 0);
+  const totalOrders = orderData.reduce(
+    (total, order) => total + order.count,
+    0
+  );
 
   // Add percentages to the data for tooltip display
   const orderDataWithPercentage = orderData.map((order) => ({
@@ -75,7 +70,7 @@ const OrderStatusPieChart: React.FC = () => {
         Order Status Distribution
       </h3>
 
-      <ResponsiveContainer width={400} height={354}>
+      <ResponsiveContainer width={350} height={354}>
         <PieChart>
           <Pie
             data={orderDataWithPercentage}
