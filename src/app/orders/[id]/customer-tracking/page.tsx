@@ -35,7 +35,7 @@ const OrderTracking = ({ params }: { params: { id: string } }) => {
       try {
         if (orderId) {
           const response = await fetch(
-            `http://localhost:3000/api/orders/${orderId}/customer-tracking`,
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/orders/${orderId}/customer-tracking`,
             {
               method: "GET",
               headers: {
