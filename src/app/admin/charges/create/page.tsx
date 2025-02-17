@@ -78,7 +78,6 @@ const Register = () => {
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-blue-400"
                 }`}
-                placeholder="Enter your email"
               />
               {errors.amount && (
                 <p className="text-red-500 text-sm mt-1">
