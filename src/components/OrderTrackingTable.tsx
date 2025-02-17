@@ -32,7 +32,7 @@ const OrderTrackingTable = ({
       <div className="bg-white shadow-md rounded-xl p-6">
         <div className="flex justify-between items-center border-b pb-4">
           <h2 className="text-xl font-bold text-gray-900">Order #{id}</h2>
-          <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+          <span className="px-3 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
             {status}
           </span>
         </div>

@@ -11,7 +11,7 @@ interface OrderData {
   customerEmail: string;
   customerPhone: string;
   address: string;
-  totalAmount: number;
+  subTotal: number;
   deliveryCharge: number;
   items: {
     productId: string; // or number
@@ -71,7 +71,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
       customerEmail,
       customerPhone,
       address,
-      totalAmount: totalPrice + deliveryCharge,
+      subTotal: totalPrice,
       deliveryCharge,
       items: cartItems.map((item) => ({
         productId: item.id,
