@@ -33,7 +33,7 @@ export const getAllProducts = async () => {
 
 
 // get product by id
-export const getProduct = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const getProduct = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;
 
     try {
@@ -201,7 +201,7 @@ export const updateProduct = async (req: NextRequest & { files?: any, formData?:
 
 
 // delete a product
-export const deleteProduct = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const deleteProduct = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;
 
     try {

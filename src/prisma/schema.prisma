@@ -46,9 +46,9 @@ model Order {
   address        String      @db.Text
   status         OrderStatus @default(PENDING)
   trackingId     String? // Optional tracking ID, added during delivery
-  totalAmount    Decimal     @db.Decimal(10, 2)
-  deliveryCharge Decimal     @db.Decimal(10, 2)
   subTotal       Decimal     @db.Decimal(10, 2)
+  deliveryCharge Decimal     @db.Decimal(10, 2)
+  totalAmount    Decimal     @db.Decimal(10, 2)
   items          OrderItem[]
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -71,4 +71,17 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+model DeliveryCharge {
+  id        String             @id @default(uuid())
+  type      DeliveryChargeType @unique @default(INSIDE_DHAKA)
+  amount    Decimal            @db.Decimal(10, 2)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+enum DeliveryChargeType {
+  INSIDE_DHAKA
+  OUTSIDE_DHAKA
 }

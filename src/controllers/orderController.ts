@@ -17,9 +17,9 @@ type TOrderInfo = {
   customerEmail?: string;
   customerPhone: string;
   address: string;
-  totalAmount: number;
-  deliveryCharge: number;
   subTotal: number;
+  deliveryCharge: number;
+  totalAmount: number;
   items: TOrderItem[];
 };
 
@@ -78,7 +78,7 @@ export const getAllOrders = async (req: NextRequest) => {
 // get an order by id
 export const getOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -132,7 +132,7 @@ export const createOrder = async (req: NextRequest) => {
     const order = await prisma.order.create({
       data: {
         ...orderInfo,
-        subTotal: Number(orderInfo.totalAmount + orderInfo.deliveryCharge),
+        totalAmount: Number(orderInfo.subTotal + orderInfo.deliveryCharge),
         items: {
           create: orderInfo.items.map((item: TOrderItem) => ({
             productId: item.productId,
@@ -158,9 +158,9 @@ export const createOrder = async (req: NextRequest) => {
             quantity: item.quantity,
             price: Number(item.price), // Convert Decimal to number
           })),
-          totalAmount: Number(order.totalAmount),
-          deliveryCharge: Number(order.deliveryCharge),
           subTotal: Number(order.subTotal),
+          deliveryCharge: Number(order.deliveryCharge),
+          totalAmount: Number(order.totalAmount),
           trackingLink: `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${order.id}/customer-tracking`,
         });
       } catch (emailError) {
@@ -191,7 +191,7 @@ export const createOrder = async (req: NextRequest) => {
 // update an order's status
 export const updateOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -242,7 +242,7 @@ export const updateOrder = async (
 // delete an order
 export const deleteOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -311,7 +311,7 @@ export const deleteOrder = async (
 // customer tracking
 export const customerTracking = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -336,9 +336,9 @@ export const customerTracking = async (
         order: {
           id: order.id,
           items: order.items,
-          totalAmount: Number(order.totalAmount),
-          deliveryCharge: Number(order.deliveryCharge),
           subTotal: Number(order.subTotal),
+          deliveryCharge: Number(order.deliveryCharge),
+          totalAmount: Number(order.totalAmount),
           status: order.status,
           trackingId: order.trackingId,
         },

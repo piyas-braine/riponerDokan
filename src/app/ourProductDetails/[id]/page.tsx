@@ -17,10 +17,11 @@ async function fetchProduct(id: string) {
 export default async function ProductDetails({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
-    const product = await fetchProduct(params.id);
+    const { id } = await params;
+    const product = await fetchProduct(id);
 
     if (!product) {
       return (
