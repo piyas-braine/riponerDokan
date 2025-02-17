@@ -78,7 +78,7 @@ export const getAllOrders = async (req: NextRequest) => {
 // get an order by id
 export const getOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -191,7 +191,7 @@ export const createOrder = async (req: NextRequest) => {
 // update an order's status
 export const updateOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -242,7 +242,7 @@ export const updateOrder = async (
 // delete an order
 export const deleteOrder = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 
@@ -311,7 +311,7 @@ export const deleteOrder = async (
 // customer tracking
 export const customerTracking = async (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
 

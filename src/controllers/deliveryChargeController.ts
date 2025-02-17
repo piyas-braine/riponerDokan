@@ -34,7 +34,7 @@ export const getAllDeliveryCharges = async (req: NextRequest) => {
 
 
 // get delivery charge by id
-export const getDeliveryCharge = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const getDeliveryCharge = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;
 
     try {
@@ -108,7 +108,7 @@ export const addDeliveryCharge = async (req: NextRequest) => {
     }
 }
 
-export const updateDeliveryCharge = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const updateDeliveryCharge = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;
 
     const deliveryChargeInfo = await req.json();
@@ -171,7 +171,7 @@ export const updateDeliveryCharge = async (req: NextRequest, { params }: { param
 
 
 // delete a delivery charge
-export const deleteDeliveryCharge = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const deleteDeliveryCharge = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;
 
     try {

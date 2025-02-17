@@ -45,7 +45,7 @@ export const getAllUsers = async (req: NextRequest) => {
 };
 
 
-export const getUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+export const getUser = async (req: NextRequest, { params }: { params: Promise<{ email: string }> }) => {
     const { email } = await params;
 
     try {
@@ -196,7 +196,7 @@ export const registerSuperAdmin = async (req: NextRequest) => {
 
 // update user 
 
-export const updateUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+export const updateUser = async (req: NextRequest, { params }: { params: Promise<{ email: string }> }) => {
     const { email } = await params;
 
     try {
@@ -245,7 +245,7 @@ export const updateUser = async (req: NextRequest, { params }: { params: { email
     }
 };
 
-export const deleteUser = async (req: NextRequest, { params }: { params: { email: string } }) => {
+export const deleteUser = async (req: NextRequest, { params }: { params: Promise<{ email: string }> }) => {
     const { email } = await params;
 
     try {

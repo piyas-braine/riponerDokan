@@ -5,7 +5,7 @@ import Image from "next/image";
 import { products } from "../../../../data/products";
 import { use } from "react"; // Import use to unwrap the promise
 
-export default function OrderPage({ params }: { params: { id: string } }) {
+export default function OrderPage( { params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(Promise.resolve(params)) as { id: string };
   console.log("Unwrapped Params:", unwrappedParams); // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [product, setProduct] = useState<any>(null);
