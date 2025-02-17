@@ -103,50 +103,45 @@ const ShippedOrdersPage: React.FC = () => {
       // Add spacing between users
       if (index !== 0) startY += 15;
 
-      // Customer Details
-      doc.setFontSize(12);
-      doc.text(`Customer Email: ${order.customerEmail}`, 14, startY + 10);
-      doc.text(`Customer Phone: ${order.customerPhone}`, 14, startY + 20);
-      doc.text(`Address: ${order.address}`, 14, startY + 30);
-      doc.text(`Total Amount: ${order.totalAmount}`, 14, startY + 40);
-      doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, startY + 50);
-
-      // Customer Information Table
+      // Product Details Table
       autoTable(doc, {
-        startY: startY + 60,
-        head: [["Field", "Details"]],
-        body: [
-          ["Customer Email", order.customerEmail],
-          ["Customer Phone", order.customerPhone],
-          ["Address", order.address],
-          ["Total Amount", `${order.totalAmount}`],
-          ["Delivery Charge", `${order.deliveryCharge}`],
-        ],
-        theme: "grid",
-        headStyles: { fillColor: [0, 150, 136] },
-      });
-
-      // Product Table
-      autoTable(doc, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        startY: (doc as any).previousAutoTable.finalY + 10,
+        startY: startY + 10,
         head: [["Product Name", "Price", "Quantity", "Total"]],
-        body: order.items.map((item) => [
-          item.productName,
-          `${item.price}`,
-          item.quantity,
-          `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
-        ]),
+        body: order.items.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (item: { productName: any; price: string; quantity: number }) => [
+            item.productName,
+            `${item.price}`,
+            item.quantity,
+            `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+          ]
+        ),
         theme: "striped",
-        headStyles: { fillColor: [44, 62, 80] },
+        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
         styles: { fontSize: 10, cellPadding: 3 },
       });
 
-      // Check if the next user will fit on the same page
-      if (index !== orders.length - 1) {
-        doc.addPage();
-        startY = 20; // Reset Y position for new page
-      }
+      // Order Summary Table (Delivery Charge & Total)
+      autoTable(doc, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        startY: (doc as any).lastAutoTable.finalY + 5,
+        head: [["Field", "Details"]],
+        body: [
+          ["Delivery Charge", `${order.deliveryCharge}`],
+          ["Total Amount", `${order.totalAmount}`],
+          ["Customer Email", order.customerEmail],
+          ["Customer Phone", order.customerPhone],
+          ["Address", order.address],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [0, 150, 136], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 3 },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startY = (doc as any).lastAutoTable.finalY + 10;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startY = (doc as any).lastAutoTable.finalY + 10;
     });
 
     doc.save("Shipped_Orders.pdf");
@@ -161,47 +156,44 @@ const ShippedOrdersPage: React.FC = () => {
     doc.setFontSize(20);
     doc.text("Riponer Dokan", 105, 15, { align: "center" });
 
-    doc.setFont("helvetica", "italic");
     doc.setFontSize(14);
     doc.text("Etai Bastob !", 105, 22, { align: "center" });
 
-    // Customer Details Section
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(`Customer Email: ${order.customerEmail}`, 14, 40);
-    doc.text(`Customer Phone: ${order.customerPhone}`, 14, 50);
-    doc.text(`Address: ${order.address}`, 14, 60);
-    doc.text(`Total Amount: ${order.totalAmount}`, 14, 70);
-    doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, 80);
+    // eslint-disable-next-line prefer-const
+    let startY = 30;
 
-    // Customer Information Table
     autoTable(doc, {
-      startY: 90,
+      startY: startY + 10,
+      head: [["Product Name", "Price", "Quantity", "Total"]],
+      body: order.items.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (item: { productName: any; price: string; quantity: number }) => [
+          item.productName,
+          `${item.price}`,
+          item.quantity,
+          `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+        ]
+      ),
+      theme: "striped",
+      headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+      styles: { fontSize: 10, cellPadding: 3 },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalY = (doc as any).lastAutoTable.finalY;
+
+    autoTable(doc, {
+      startY: finalY + 5,
       head: [["Field", "Details"]],
       body: [
+        ["Delivery Charge", `${order.deliveryCharge}`],
+        ["Total Amount", `${order.totalAmount}`],
         ["Customer Email", order.customerEmail],
         ["Customer Phone", order.customerPhone],
         ["Address", order.address],
-        ["Total Amount", `${order.totalAmount}`],
-        ["Delivery Charge", `${order.deliveryCharge}`],
       ],
       theme: "grid",
-      headStyles: { fillColor: [0, 150, 136] },
-    });
-
-    // Product Table
-    autoTable(doc, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      startY: (doc as any).previousAutoTable.finalY + 10,
-      head: [["Product Name", "Price", "Quantity", "Total"]],
-      body: order.items.map((item) => [
-        item.productName,
-        `${item.price}`,
-        item.quantity,
-        `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
-      ]),
-      theme: "striped",
-      headStyles: { fillColor: [44, 62, 80] },
+      headStyles: { fillColor: [0, 150, 136], textColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 3 },
     });
 
@@ -301,7 +293,7 @@ const ShippedOrdersPage: React.FC = () => {
         <div>
           <button
             onClick={() => generateAllUsersPDF(shippedOrders)}
-            className="bg-blue-500 text-white px-3 py-1 font-semibold rounded-md"
+            className="bg-blue-500 text-white px-3 py-2 font-semibold rounded-md"
           >
             Export All
           </button>
