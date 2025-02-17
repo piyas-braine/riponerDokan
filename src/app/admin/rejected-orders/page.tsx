@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Swal from "sweetalert2";
 
 interface OrderItem {
   id: string;
@@ -227,6 +228,61 @@ const RejectedOrdersPage: React.FC = () => {
     doc.save(`Order_${order.id}.pdf`);
   };
 
+  // toggle status
+
+  const handleStatusToggle = async (orderId: string, currentStatus: string) => {
+    const newStatus =
+      currentStatus === "CANCELLED" ? "PROCESSING" : "CANCELLED";
+
+    // Show confirmation modal
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `Change order ${orderId} status to ${newStatus}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    });
+
+    if (result.isConfirmed) {
+      // Update UI optimistically
+      setRejectedOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      try {
+        // Send API request
+        await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
+
+        // Show success message
+        Swal.fire(
+          "Updated!",
+          `Order ${orderId} status changed to ${newStatus}.`,
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+
+        // Revert UI if API fails
+        setRejectedOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId ? { ...order, status: currentStatus } : order
+          )
+        );
+
+        // Show error message
+        Swal.fire(
+          "Error!",
+          "Failed to update order status. Please try again.",
+          "error"
+        );
+      }
+    }
+  };
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Rejected Orders</h2>
@@ -276,7 +332,10 @@ const RejectedOrdersPage: React.FC = () => {
                 <td className="border border-gray-300 p-2">
                   {order.customerEmail}
                 </td>
-                <td className="border border-gray-300 p-2 text-xs font-bold text-red-500">
+                <td
+                  className="border border-gray-300 p-2 cursor-pointer text-yellow-500 text-xs font-bold"
+                  onClick={() => handleStatusToggle(order.id, order.status)}
+                >
                   {order.status}
                 </td>
                 <td className="border border-gray-300 p-2">
