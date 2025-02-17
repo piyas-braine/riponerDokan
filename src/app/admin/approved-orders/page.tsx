@@ -3,6 +3,11 @@ import React, { useState, useEffect } from "react";
 import apiClient from "@/utils/apiClient";
 import { toast } from "react-toastify";
 import DeleteModal from "@/components/deleteModal/DeleteModal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import Swal from "sweetalert2";
 
 interface OrderItem {
   id: string;
@@ -30,9 +35,14 @@ interface Order {
 
 const ApprovedOrdersPage: React.FC = () => {
   const [approvedOrders, setApprovedOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchApprovedOrders = async () => {
@@ -42,6 +52,7 @@ const ApprovedOrdersPage: React.FC = () => {
           "orders?status=PROCESSING"
         );
         setApprovedOrders(response.data);
+        setFilteredOrders(response.data); // Initialize filtered orders
       } catch (err) {
         console.log(err);
         setError("Failed to fetch orders. Please try again.");
@@ -53,30 +64,208 @@ const ApprovedOrdersPage: React.FC = () => {
     fetchApprovedOrders();
   }, []);
 
+  // Search and Filter Function
+  useEffect(() => {
+    let filtered = approvedOrders;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (order) =>
+          order.customerEmail
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          order.items.some((item) =>
+            item.productName.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      );
+    }
+
+    if (selectedDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.createdAt).toLocaleDateString();
+        return orderDate === selectedDate.toLocaleDateString();
+      });
+    }
+
+    setFilteredOrders(filtered);
+  }, [searchTerm, selectedDate, approvedOrders]);
+
   const handleStatusToggle = async (orderId: string, currentStatus: string) => {
     const newStatus = currentStatus === "PROCESSING" ? "SHIPPED" : "PROCESSING";
 
-    setApprovedOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+    // Show confirmation modal
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `Change order ${orderId} status to ${newStatus}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    });
 
-    try {
-      await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
-    } catch (error) {
-      console.log(error);
+    if (result.isConfirmed) {
+      // Update UI optimistically
       setApprovedOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: currentStatus } : order
+          order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
 
-      // Handle error and show a toast notification or error message
-      setError("Failed to update order status. Please try again.");
+      try {
+        // Send API request
+        await apiClient.patch(`/orders/${orderId}`, { status: newStatus });
+
+        // Show success message
+        Swal.fire(
+          "Updated!",
+          `Order ${orderId} status changed to ${newStatus}.`,
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+
+        // Revert UI if API fails
+        setApprovedOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId ? { ...order, status: currentStatus } : order
+          )
+        );
+
+        // Show error message
+        Swal.fire(
+          "Error!",
+          "Failed to update order status. Please try again.",
+          "error"
+        );
+      }
     }
   };
 
+  // for all users pdf
+  const generateAllUsersPDF = (orders: Order[]) => {
+    const doc = new jsPDF();
+
+    // Title & Tagline
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Riponer Dokan", 105, 15, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text("Etai Bastob !", 105, 22, { align: "center" });
+
+    let startY = 30; // Initial Y position
+
+    orders.forEach((order, index) => {
+      // Add spacing between users
+      if (index !== 0) startY += 15;
+
+      // Customer Details
+      doc.setFontSize(12);
+      doc.text(`Customer Email: ${order.customerEmail}`, 14, startY + 10);
+      doc.text(`Customer Phone: ${order.customerPhone}`, 14, startY + 20);
+      doc.text(`Address: ${order.address}`, 14, startY + 30);
+      doc.text(`Total Amount: ${order.totalAmount}`, 14, startY + 40);
+      doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, startY + 50);
+
+      // Customer Information Table
+      autoTable(doc, {
+        startY: startY + 60,
+        head: [["Field", "Details"]],
+        body: [
+          ["Customer Email", order.customerEmail],
+          ["Customer Phone", order.customerPhone],
+          ["Address", order.address],
+          ["Total Amount", `${order.totalAmount}`],
+          ["Delivery Charge", `${order.deliveryCharge}`],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [0, 150, 136] },
+      });
+
+      // Product Table
+      autoTable(doc, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        startY: (doc as any).previousAutoTable.finalY + 10,
+        head: [["Product Name", "Price", "Quantity", "Total"]],
+        body: order.items.map((item) => [
+          item.productName,
+          `${item.price}`,
+          item.quantity,
+          `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [44, 62, 80] },
+        styles: { fontSize: 10, cellPadding: 3 },
+      });
+
+      // Check if the next user will fit on the same page
+      if (index !== orders.length - 1) {
+        doc.addPage();
+        startY = 20; // Reset Y position for new page
+      }
+    });
+
+    doc.save("Approved_Orders.pdf");
+  };
+
+  // for single user pdf
+  const generatePDF = (order: Order) => {
+    const doc = new jsPDF();
+
+    // Title & Tagline
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Riponer Dokan", 105, 15, { align: "center" });
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(14);
+    doc.text("Etai Bastob !", 105, 22, { align: "center" });
+
+    // Customer Details Section
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Customer Email: ${order.customerEmail}`, 14, 40);
+    doc.text(`Customer Phone: ${order.customerPhone}`, 14, 50);
+    doc.text(`Address: ${order.address}`, 14, 60);
+    doc.text(`Total Amount: ${order.totalAmount}`, 14, 70);
+    doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, 80);
+
+    // Customer Information Table
+    autoTable(doc, {
+      startY: 90,
+      head: [["Field", "Details"]],
+      body: [
+        ["Customer Email", order.customerEmail],
+        ["Customer Phone", order.customerPhone],
+        ["Address", order.address],
+        ["Total Amount", `${order.totalAmount}`],
+        ["Delivery Charge", `${order.deliveryCharge}`],
+      ],
+      theme: "grid",
+      headStyles: { fillColor: [0, 150, 136] },
+    });
+
+    // Product Table
+    autoTable(doc, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startY: (doc as any).previousAutoTable.finalY + 10,
+      head: [["Product Name", "Price", "Quantity", "Total"]],
+      body: order.items.map((item) => [
+        item.productName,
+        `${item.price}`,
+        item.quantity,
+        `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [44, 62, 80] },
+      styles: { fontSize: 10, cellPadding: 3 },
+    });
+
+    // Save PDF
+    doc.save(`Order_${order.id}.pdf`);
+  };
   const handleDelete = async (id: string) => {
     try {
       await apiClient.delete(`/orders/${id}`);
@@ -88,7 +277,7 @@ const ApprovedOrdersPage: React.FC = () => {
       console.error(err);
       toast.error("Failed to delete the order. Please try again.");
     }
-    setConfirmDeleteId(null); // Close the confirm modal
+    setConfirmDeleteId(null);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -97,6 +286,33 @@ const ApprovedOrdersPage: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Approved Orders</h2>
+
+      {/* Filters Section */}
+      <div className="flex flex-wrap gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by email "
+          className="border p-2 rounded w-64"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Filter by Date"
+          className="border p-2 rounded"
+        />
+        <div>
+          <button
+            onClick={() => generateAllUsersPDF(approvedOrders)}
+            className="bg-blue-500 text-white px-3 py-1 font-semibold rounded-md"
+          >
+            Export All
+          </button>
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="table-auto w-full text-sm border-collapse border border-gray-200">
@@ -108,38 +324,55 @@ const ApprovedOrdersPage: React.FC = () => {
               <th className="border border-gray-300 p-2">Total Amount</th>
               <th className="border border-gray-300 p-2">Created At</th>
               <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border border-gray-300 p-2">Export</th>
             </tr>
           </thead>
           <tbody>
-            {approvedOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="border border-gray-300 p-2">{order.id}</td>
-                <td className="border border-gray-300 p-2">
-                  {order.customerEmail}
-                </td>
-                <td
-                  className="border border-gray-300 p-2 cursor-pointer text-yellow-500 text-xs font-bold"
-                  onClick={() => handleStatusToggle(order.id, order.status)}
-                >
-                  {order.status}
-                </td>{" "}
-                <td className="border border-gray-300 p-2">
-                  <span className="text-2xl font-bold">৳</span>
-                  {order.totalAmount}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {new Date(order.createdAt).toLocaleString()}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <button
-                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
-                    onClick={() => setConfirmDeleteId(order.id)}
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <tr key={order.id}>
+                  <td className="border border-gray-300 p-2">{order.id}</td>
+                  <td className="border border-gray-300 p-2">
+                    {order.customerEmail}
+                  </td>
+                  <td
+                    className="border border-gray-300 p-2 cursor-pointer text-yellow-500 text-xs font-bold"
+                    onClick={() => handleStatusToggle(order.id, order.status)}
                   >
-                    Delete
-                  </button>
+                    {order.status}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <span className="text-2xl font-bold">৳</span>
+                    {order.totalAmount}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <button
+                      className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                      onClick={() => setConfirmDeleteId(order.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => generatePDF(order)}
+                      className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+                    >
+                      Export
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center p-4">
+                  No orders found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
