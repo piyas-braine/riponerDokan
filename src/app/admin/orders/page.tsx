@@ -2,15 +2,24 @@
 import DeleteModal from "@/components/deleteModal/DeleteModal";
 import { Order } from "@/types/Types";
 import apiClient from "@/utils/apiClient";
+import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
-
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 const Page: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [ordersApi, setOrdersApi] = useState<Order[]>([]); // State to hold orders from backend
+  const [ordersApi, setOrdersApi] = useState<Order[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const handleAction = async (action: string, orderId: string) => {
     // const updatedStatus = action === "approve" ? "PROCESSING" : "REJECTED";
@@ -67,9 +76,37 @@ const Page: React.FC = () => {
   };
 
   useEffect(() => {
+    let filtered = ordersApi;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (order) =>
+          order.customerEmail
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          order.customerPhone
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          order.items.some((item: { productName: string }) =>
+            item.productName.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      );
+    }
+
+    if (selectedDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.createdAt).toLocaleDateString();
+        return orderDate === selectedDate.toLocaleDateString();
+      });
+    }
+
+    setFilteredOrders(filtered);
+  }, [searchTerm, selectedDate, ordersApi]);
+
+  useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await apiClient.get("orders?status=PENDING"); // Adjust the API endpoint as needed
+        const response = await apiClient.get("orders?status=PENDING");
         if (response.data) {
           setOrdersApi(response.data); // Set the fetched data
         }
@@ -111,9 +148,173 @@ const Page: React.FC = () => {
     setConfirmDeleteId(null); // Close the confirm modal
   };
 
+  console.log(ordersApi);
+  // for all users pdf
+  const generateAllUsersPDF = (orders: Order[]) => {
+    const doc = new jsPDF();
+
+    // Title & Tagline
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Riponer Dokan", 105, 15, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text("Etai Bastob !", 105, 22, { align: "center" });
+
+    let startY = 30; // Initial Y position
+
+    orders.forEach((order, index) => {
+      // Add spacing between users
+      if (index !== 0) startY += 15;
+
+      // Customer Details
+      doc.setFontSize(12);
+      doc.text(`Customer Email: ${order.customerEmail}`, 14, startY + 10);
+      doc.text(`Customer Phone: ${order.customerPhone}`, 14, startY + 20);
+      doc.text(`Address: ${order.address}`, 14, startY + 30);
+      doc.text(`Total Amount: ${order.totalAmount}`, 14, startY + 40);
+      doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, startY + 50);
+
+      // Customer Information Table
+      autoTable(doc, {
+        startY: startY + 60,
+        head: [["Field", "Details"]],
+        body: [
+          ["Customer Email", order.customerEmail],
+          ["Customer Phone", order.customerPhone],
+          ["Address", order.address],
+          ["Total Amount", `${order.totalAmount}`],
+          ["Delivery Charge", `${order.deliveryCharge}`],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [0, 150, 136] },
+      });
+
+      // Product Table
+      autoTable(doc, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        startY: (doc as any).previousAutoTable.finalY + 10,
+        head: [["Product Name", "Price", "Quantity", "Total"]],
+        body: order.items.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (item: { productName: any; price: string; quantity: number }) => [
+            item.productName,
+            `${item.price}`,
+            item.quantity,
+            `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+          ]
+        ),
+        theme: "striped",
+        headStyles: { fillColor: [44, 62, 80] },
+        styles: { fontSize: 10, cellPadding: 3 },
+      });
+
+      // Check if the next user will fit on the same page
+      if (index !== orders.length - 1) {
+        doc.addPage();
+        startY = 20; // Reset Y position for new page
+      }
+    });
+
+    doc.save("New_Orders.pdf");
+  };
+
+  // for single user pdf
+  const generatePDF = (order: Order) => {
+    const doc = new jsPDF();
+
+    // Title & Tagline
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Riponer Dokan", 105, 15, { align: "center" });
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(14);
+    doc.text("Etai Bastob !", 105, 22, { align: "center" });
+
+    // Customer Details Section
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Customer Email: ${order.customerEmail}`, 14, 40);
+    doc.text(`Customer Phone: ${order.customerPhone}`, 14, 50);
+    doc.text(`Address: ${order.address}`, 14, 60);
+    doc.text(`Total Amount: ${order.totalAmount}`, 14, 70);
+    doc.text(`Delivery Charge: ${order.deliveryCharge}`, 14, 80);
+
+    // Customer Information Table
+    autoTable(doc, {
+      startY: 90,
+      head: [["Field", "Details"]],
+      body: [
+        ["Customer Email", order.customerEmail],
+        ["Customer Phone", order.customerPhone],
+        ["Address", order.address],
+        ["Total Amount", `${order.totalAmount}`],
+        ["Delivery Charge", `${order.deliveryCharge}`],
+      ],
+      theme: "grid",
+      headStyles: { fillColor: [0, 150, 136] },
+    });
+
+    // Product Table
+    autoTable(doc, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startY: (doc as any).previousAutoTable.finalY + 10,
+      head: [["Product Name", "Price", "Quantity", "Total"]],
+      body: order.items.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (item: { productName: any; price: string; quantity: number }) => [
+          item.productName,
+          `${item.price}`,
+          item.quantity,
+          `${(parseFloat(item.price) * item.quantity).toFixed(2)}`,
+        ]
+      ),
+      theme: "striped",
+      headStyles: { fillColor: [44, 62, 80] },
+      styles: { fontSize: 10, cellPadding: 3 },
+    });
+
+    // Save PDF
+    doc.save(`Order_${order.id}.pdf`);
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Orders</h2>
+      {/* Filters Section */}
+      <div className="flex flex-wrap gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by email or phone "
+          className="border p-2 rounded w-64"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Filter by Date"
+          className="border p-2 rounded "
+        />
+        <div>
+          <Link href={"/admin/orders/create-order"}>
+            <button className="bg-blue-500 text-white px-3 py-2 font-semibold rounded-md">
+              Create order
+            </button>
+          </Link>
+        </div>
+        <div>
+          <button
+            onClick={() => generateAllUsersPDF(ordersApi)}
+            className="bg-blue-500 text-white px-3 py-2 font-semibold rounded-md"
+          >
+            Export All
+          </button>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg max-h-[80vh] overflow-auto">
           <thead className="bg-gray-100">
@@ -142,11 +343,14 @@ const Page: React.FC = () => {
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
                 Delete
               </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Export
+              </th>
             </tr>
           </thead>
           <tbody>
-            {ordersApi.length > 0 ? (
-              ordersApi.map((order, index) => (
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order, index) => (
                 <tr key={order.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-800">
                     {index + 1}
@@ -154,6 +358,7 @@ const Page: React.FC = () => {
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {order.customerEmail}
                   </td>
+
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {order.customerPhone}
                   </td>
@@ -212,12 +417,20 @@ const Page: React.FC = () => {
                       </div>
                     )}
                   </td>
-                  <td className="border border-gray-300 p-2">
+                  <td className="  p-2">
                     <button
                       className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
                       onClick={() => setConfirmDeleteId(order.id)}
                     >
                       Delete
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => generatePDF(order)}
+                      className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+                    >
+                      Export
                     </button>
                   </td>
                 </tr>
