@@ -15,9 +15,9 @@ interface Order {
   id: string;
   status: string;
   items: OrderItem[] | []; // Define the type of items based on your data structure
-  totalAmount: number;
-  deliveryCharge: number;
   subTotal: number;
+  deliveryCharge: number;
+  totalAmount: number;
 }
 
 const OrderTracking = ({ params }: { params: { id: string } }) => {

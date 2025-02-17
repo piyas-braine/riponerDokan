@@ -11,9 +11,9 @@ type Order = {
   id: string;
   status: string;
   items: OrderItem[];
-  totalAmount: number;
-  deliveryCharge: number;
   subTotal: number;
+  deliveryCharge: number;
+  totalAmount: number;
   trackingId?: string;
 };
 
@@ -21,9 +21,9 @@ const OrderTrackingTable = ({
   id,
   status,
   items,
-  totalAmount,
-  deliveryCharge,
   subTotal,
+  deliveryCharge,
+  totalAmount,
   trackingId,
 }: Order) => {
   return (
@@ -55,7 +55,9 @@ const OrderTrackingTable = ({
               {items?.map((item) => (
                 <tr key={item.id} className="border-b">
                   <td className="p-3">{item.productName}</td>
-                  <td className="text-right p-3">BDT. {Number(item?.price)?.toFixed(2)}</td>
+                  <td className="text-right p-3">
+                    BDT. {Number(item?.price)?.toFixed(2)}
+                  </td>
                   <td className="text-right p-3">{item?.quantity}</td>
                   <td className="text-right p-3 font-medium text-black">
                     BDT{(item.price * item.quantity).toFixed(2)}
@@ -72,16 +74,18 @@ const OrderTrackingTable = ({
         <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
         <div className="space-y-3 text-gray-700">
           <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span className="font-medium">BDT. {totalAmount.toFixed(2)}</span>
+            <span>Sub Total</span>
+            <span className="font-medium">BDT. {subTotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>Delivery Charge</span>
-            <span className="font-medium">BDT. {deliveryCharge.toFixed(2)}</span>
+            <span className="font-medium">
+              BDT. {deliveryCharge.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between border-t pt-4 text-lg font-semibold text-black">
-            <span>Total</span>
-            <span>BDT. {subTotal.toFixed(2)}</span>
+            <span>Total Amount (Amount to Pay)</span>
+            <span>BDT. {totalAmount.toFixed(2)}</span>
           </div>
         </div>
       </div>

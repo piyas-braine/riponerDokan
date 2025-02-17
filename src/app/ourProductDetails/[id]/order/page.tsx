@@ -48,7 +48,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       customerEmail: formData.get("email"),
       customerPhone: formData.get("phone"),
       address: formData.get("address"),
-      totalAmount: totalPrice.toFixed(2),
+      subTotal: totalPrice.toFixed(2),
       items: {
         id: product?.id,
         name: product?.name,

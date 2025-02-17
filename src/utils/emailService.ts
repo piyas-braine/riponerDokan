@@ -66,7 +66,7 @@ export const sendOrderConfirmationEmail = async (orderData: TOrderEmailData) => 
               <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <tr>
                   <td style="padding: 10px; border: 1px solid #ddd;"><strong>Sub Total:</strong></td>
-                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">BDT ${orderData.totalAmount.toFixed(2)}</td>
+                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">BDT ${orderData.subTotal.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px; border: 1px solid #ddd;"><strong>Delivery Charge:</strong></td>
@@ -74,7 +74,7 @@ export const sendOrderConfirmationEmail = async (orderData: TOrderEmailData) => 
                 </tr>
                 <tr style="background-color: #f1f1f1;">
                   <td style="padding: 10px; border: 1px solid #ddd;"><strong>Total Amount (Amount to Pay):</strong></td>
-                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>BDT ${orderData.subTotal.toFixed(2)}</strong></td>
+                  <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>BDT ${orderData.totalAmount.toFixed(2)}</strong></td>
                 </tr>
               </table>
             </div>
