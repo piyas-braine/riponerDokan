@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { AiOutlineProduct } from "react-icons/ai";
-import { FaTachometerAlt, FaUserFriends } from "react-icons/fa"; // Dashboard Icon
+import { FaMoneyBill, FaTachometerAlt, FaUserFriends } from "react-icons/fa"; // Dashboard Icon
 import { FaClipboardList } from "react-icons/fa"; // Orders Icon
 import { FaCheckCircle } from "react-icons/fa"; // Approved Orders Icon
 import { FaTimesCircle } from "react-icons/fa"; // Rejected Orders Icon
@@ -44,4 +44,5 @@ export const routes: Route[] = [
   { name: "Sales Overview", path: "/admin/sales", icon: <FaChartLine /> },
   { name: "Analytics", path: "/admin/analytics", icon: <IoAnalytics /> },
   { name: "User Management", path: "/admin/users", icon: <FaUserFriends /> },
+  { name: "Charges Management", path: "/admin/charges", icon: <FaMoneyBill /> },
 ];
