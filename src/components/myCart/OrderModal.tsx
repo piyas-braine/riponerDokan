@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import apiClient from "@/utils/apiClient";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface CartItem {
   id: string; // or number, depending on your data structure
@@ -39,15 +41,18 @@ const OrderModal: React.FC<OrderModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [deliveryCharge, setDeliveryCharge] = useState<number>(70);
+  const [deliveryCharges, setDeliveryCharges] = useState([]);
 
-  const handleDeliveryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.value === "Inside Dhaka") {
-      setDeliveryCharge(70);
-    } else if (event.target.value === "Outside Dhaka") {
-      setDeliveryCharge(120);
-    }
-  };
+  useEffect(() => {
+    const fetchDeliveryCharges = async () => {
+      const response = await apiClient.get("/delivery-charges"); // Adjust the API endpoint as needed
+      if (response.data) {
+        setDeliveryCharges(response.data);
+      }
+    };
+
+    fetchDeliveryCharges();
+  }, []);
 
   const handleSubmit = () => {
     // Validation logic
@@ -66,13 +71,28 @@ const OrderModal: React.FC<OrderModalProps> = ({
       return;
     }
 
+    const deliveryChargeElement = document.querySelector(
+      "input[name='deliveryCharge']:checked"
+    );
+
+    const deliveryChargeAmount = parseInt(
+      (deliveryChargeElement as HTMLInputElement).value
+    );
+
+    if (!deliveryChargeAmount) {
+      toast.error("Please select a delivery charge.");
+      return;
+    }
+
+    // console.log(deliveryChargeAmount);
+
     // Proceed with form submission
     const orderData = {
       customerEmail,
       customerPhone,
       address,
       subTotal: totalPrice,
-      deliveryCharge,
+      deliveryCharge: deliveryChargeAmount,
       items: cartItems.map((item) => ({
         productId: item.id,
         productName: item.name,
@@ -80,6 +100,8 @@ const OrderModal: React.FC<OrderModalProps> = ({
         quantity: item.quantity,
       })),
     };
+
+    // console.log(orderData);
     onSubmit(orderData);
   };
 
@@ -123,34 +145,27 @@ const OrderModal: React.FC<OrderModalProps> = ({
           <div>
             <p className="text-sm font-medium">Select Delivery Option</p>
             <div className="flex items-center space-x-4">
-              <div>
-                <input
-                  type="radio"
-                  id="insideDhaka"
-                  name="deliveryCharge"
-                  value="Inside Dhaka"
-                  checked={deliveryCharge === 70}
-                  onChange={handleDeliveryChange}
-                  className="mr-2"
-                />
-                <label htmlFor="insideDhaka" className="text-sm">
-                  Inside Dhaka - 70
-                </label>
-              </div>
-              <div>
-                <input
-                  type="radio"
-                  id="outsideDhaka"
-                  name="deliveryCharge"
-                  value="Outside Dhaka"
-                  checked={deliveryCharge === 120}
-                  onChange={handleDeliveryChange}
-                  className="mr-2"
-                />
-                <label htmlFor="outsideDhaka" className="text-sm">
-                  Outside Dhaka - 120
-                </label>
-              </div>
+              {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                deliveryCharges.map((deliveryCharge: any, index: number) => (
+                  <div key={deliveryCharge?.id}>
+                    <input
+                      type="radio"
+                      id={deliveryCharge?.id}
+                      name="deliveryCharge"
+                      value={deliveryCharge?.amount}
+                      defaultChecked={index === 0}
+                      className="mr-2"
+                    />
+                    <label htmlFor={deliveryCharge?.id} className="text-sm">
+                      {deliveryCharge?.type === "INSIDE_DHAKA"
+                        ? "Inside Dhaka"
+                        : "Outside Dhaka"}{" "}
+                      - {deliveryCharge?.amount}
+                    </label>
+                  </div>
+                ))
+              }
             </div>
           </div>
         </div>
