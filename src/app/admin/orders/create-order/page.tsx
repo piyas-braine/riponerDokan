@@ -47,17 +47,19 @@ const Page = () => {
     setSelectedProduct(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    button.disabled = true;
     if (!selectedProduct) return;
 
     const totalPrice = selectedProduct.price * quantity;
-    const totalAmount = totalPrice + deliveryCharge;
+    const totalAmount = totalPrice;
 
     const orderData = {
       customerEmail,
       customerPhone,
       address,
-      totalAmount,
+      subTotal: totalAmount,
       deliveryCharge,
       items: [
         {
@@ -84,6 +86,8 @@ const Page = () => {
       }
     } catch (error) {
       console.error("Error placing order:", error);
+    } finally {
+      button.disabled = false;
     }
   };
 

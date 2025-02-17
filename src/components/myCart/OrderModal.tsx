@@ -101,7 +101,6 @@ const OrderModal: React.FC<OrderModalProps> = ({
       })),
     };
 
-    // console.log(orderData);
     onSubmit(orderData);
   };
 
