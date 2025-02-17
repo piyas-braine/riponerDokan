@@ -48,7 +48,7 @@ const EditDeliveryCharge = ({
 
   return (
     <div className="flex items-center justify-center h-full">
-      <div className="bg-white w-full md:max-w-2xl p-4 sm:p-6 rounded-lg shadow-lg relative z-50 shadow-lg">
+      <div className="bg-white w-full md:max-w-2xl p-4 sm:p-6 rounded-lg shadow-lg relative z-50">
         <h1 className="text-2xl font-bold text-center mb-2">
           Edit Delivery Charge
         </h1>
@@ -69,7 +69,6 @@ const EditDeliveryCharge = ({
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-blue-400"
                 }`}
-                placeholder="Enter your email"
               />
               {errors.amount && (
                 <p className="text-red-500 text-sm mt-1">
