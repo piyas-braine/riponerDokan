@@ -6,18 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
 // get all delivery charges
-export const getAllDeliveryCharges = async (req: NextRequest) => {
+export const getAllDeliveryCharges = async () => {
     try {
-        const authHeader = req.headers.get('authorization');
-        const token = authHeader?.split(' ')[1];
-
-        const isAuthenticated = await authenticateUser({ token: token as string, requiredRole: 'ADMIN' });
-
-        if (!isAuthenticated) {
-            return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-                status: 401
-            });
-        }
 
         const deliveryCharges = await prisma.deliveryCharge.findMany();
 
