@@ -68,6 +68,10 @@ const OurProductsSlider: React.FC = () => {
     window.location.href = "/myCart";
   };
 
+
+
+  console.log(products)
+
   return (
     <div>
       <Swiper
@@ -95,9 +99,11 @@ const OurProductsSlider: React.FC = () => {
               {/* Image Section */}
               <div className="relative w-full h-[200px]">
                 <Image
-                  src={`/${product.productImages[0].split("/")[1]}/${
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/${product.productImages[0].split("/")[1]}/${
                     product.productImages[0].split("/")[2]
                   }/${product.productImages[0].split("/")[3]}`}
+
+
                   alt={product.name}
                   layout="fill" // Makes image responsive
                   objectFit="cover" // Ensures the image covers the container proportionally

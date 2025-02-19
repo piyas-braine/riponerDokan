@@ -48,7 +48,7 @@ export default async function ProductDetails({
             <div className=" flex items-center justify-center p-12">
               <div className="relative w-full max-w-lg h-[500px] rounded-lg overflow-hidden ">
                 <Image
-                  src={`/${productImages[0].split("/")[1]}/${
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/${productImages[0].split("/")[1]}/${
                     productImages[0].split("/")[2]
                   }/${productImages[0].split("/")[3]}`}
                   alt={name}

@@ -118,7 +118,7 @@ const Page: React.FC = () => {
                 <tr key={product.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-700 flex justify-center items-center">
                     <Image
-                      src={`/${product.productImages[0].split("/")[1]}/${
+                      src={`${process.env.NEXT_PUBLIC_BASE_URL}/${product.productImages[0].split("/")[1]}/${
                         product.productImages[0].split("/")[2]
                       }/${product.productImages[0].split("/")[3]}`}
                       width={40}

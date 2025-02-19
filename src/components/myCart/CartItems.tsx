@@ -28,7 +28,7 @@ const CartItems = ({
       <td className="p-2 md:p-3 flex items-center space-x-4">
         <div className="relative w-12 h-12 md:w-16 md:h-16">
           <Image
-            src={`/${item.productImages[0].split("/")[1]}/${
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/${item.productImages[0].split("/")[1]}/${
               item.productImages[0].split("/")[2]
             }/${item.productImages[0].split("/")[3]}`}
             alt={item.name}

@@ -148,6 +148,8 @@ export const registerUser = async (
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        console.log("hashedPassword..:" + hashedPassword)
+
         await prisma.user.create({
             data: {
                 name,
@@ -173,8 +175,10 @@ export const registerSuperAdmin = async (req: NextRequest) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    console.log("hashedPassword..:" + hashedPassword)
+
     try {
-        await prisma.user.create({
+       const res =  await prisma.user.create({
             data: {
                 name,
                 email,
@@ -183,12 +187,12 @@ export const registerSuperAdmin = async (req: NextRequest) => {
             }
         });
 
-        return new NextResponse(JSON.stringify({ message: 'Super Admin created successfully' }), {
+        return new NextResponse(JSON.stringify({ message: 'Super Admin created successfully',hashedPassword , res}), {
             status: 201
         });
     } catch (error) {
         console.log(error);
-        return new NextResponse(JSON.stringify({ error: 'Something went wrong' }), {
+        return new NextResponse(JSON.stringify({ error: 'Something went wrong' , msgError: error }), {
             status: 500
         });
     }
